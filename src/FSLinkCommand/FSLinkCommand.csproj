@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FSLinkCommon\FSLinkCommon.csproj" />
+    <ProjectReference Include="..\FSLinkLib\FSLinkLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Unlink\" />
+  </ItemGroup>
+
+</Project>

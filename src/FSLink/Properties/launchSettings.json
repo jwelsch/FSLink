@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FSLink": {
+      "commandName": "Project",
+      "commandLineArgs": "reparse --path \"C:\\Temp\\Link\\Junction\""
+    }
+  }
+}
