@@ -1,5 +1,5 @@
 ﻿using CommandLine;
-using FSLinkCommand.Reparse;
+using FSLinkCommand.Command.Reparse;
 
 namespace FSLink.CommandLine
 {

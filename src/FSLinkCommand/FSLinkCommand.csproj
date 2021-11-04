@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Unlink\" />
+    <Folder Include="Command\Unlink\" />
   </ItemGroup>
 
 </Project>

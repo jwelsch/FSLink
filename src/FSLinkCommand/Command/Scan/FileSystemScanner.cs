@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace FSLinkCommand.Scan
+namespace FSLinkCommand.Command.Scan
 {
     public interface IFileSystemScanner
     {

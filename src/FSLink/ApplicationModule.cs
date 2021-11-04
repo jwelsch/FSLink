@@ -1,8 +1,8 @@
 ﻿using Autofac;
 using FSLink.CommandLine;
-using FSLinkCommand;
-using FSLinkCommand.Reparse;
-using FSLinkCommand.Scan;
+using FSLinkCommand.Command;
+using FSLinkCommand.Command.Reparse;
+using FSLinkCommand.Command.Scan;
 
 namespace FSLink
 {

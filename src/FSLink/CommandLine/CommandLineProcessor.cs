@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using FSLinkCommand;
+using FSLinkCommand.Command;
 
 #nullable enable
 

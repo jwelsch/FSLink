@@ -1,4 +1,4 @@
-﻿using FSLinkCommand.Reparse;
+﻿using FSLinkCommand.Command.Reparse;
 using FSLinkLib;
 using Microsoft.Extensions.Logging;
 

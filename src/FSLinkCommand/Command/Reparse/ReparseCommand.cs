@@ -2,13 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FSLinkCommand.Reparse
+namespace FSLinkCommand.Command.Reparse
 {
-    public interface IReparseArguments : ICommandArguments
-    {
-        string Path { get; }
-    }
-
     public class ReparseCommand : ICommandBase
     {
         private readonly IReparseArguments _commandArguments;

@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FSLink.CommandLine;
-using FSLinkCommand;
+using FSLinkCommand.Command;
 using FSLinkCommon;
 using FSLinkLib;
 using Microsoft.Extensions.DependencyInjection;

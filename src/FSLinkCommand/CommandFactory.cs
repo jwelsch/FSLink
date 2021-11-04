@@ -1,13 +1,14 @@
-﻿using FSLinkCommand.Create;
-using FSLinkCommand.Delete;
-using FSLinkCommand.Relink;
-using FSLinkCommand.Reparse;
-using FSLinkCommand.Scan;
+﻿using FSLinkCommand.Command.Create;
+using FSLinkCommand.Command.Delete;
+using FSLinkCommand.Command.Relink;
+using FSLinkCommand.Command.Reparse;
+using FSLinkCommand.Command.Scan;
+using FSLinkCommand.FileSystem;
 using FSLinkCommon.Wraps;
 using FSLinkLib;
 using System;
 
-namespace FSLinkCommand
+namespace FSLinkCommand.Command
 {
     public interface ICommandFactory
     {
@@ -22,8 +23,11 @@ namespace FSLinkCommand
         private readonly IDirectoryWrap _directoryWrap;
         private readonly IScanOutput _scanOutput;
         private readonly IReparseOutput _reparseOutput;
+        private readonly IHardLink _hardLink;
+        private readonly IJunction _junction;
+        private readonly ISymbolicLink _symbolicLink;
 
-        public CommandFactory(IFileSystemLink fileSystemLink, IFileSystemScanner fileSystemScanner, IFileWrap fileWrap, IDirectoryWrap directoryWrap, IScanOutput scanOutput, IReparseOutput reparseOutput)
+        public CommandFactory(IFileSystemLink fileSystemLink, IFileSystemScanner fileSystemScanner, IFileWrap fileWrap, IDirectoryWrap directoryWrap, IScanOutput scanOutput, IReparseOutput reparseOutput, IHardLink hardLink, IJunction junction, ISymbolicLink symbolicLink)
         {
             _fileSystemLink = fileSystemLink;
             _fileSystemScanner = fileSystemScanner;
@@ -31,6 +35,9 @@ namespace FSLinkCommand
             _directoryWrap = directoryWrap;
             _scanOutput = scanOutput;
             _reparseOutput = reparseOutput;
+            _hardLink = hardLink;
+            _junction = junction;
+            _symbolicLink = symbolicLink;
         }
 
         public ICommandBase Create(ICommandArguments commandArguments)
@@ -40,7 +47,7 @@ namespace FSLinkCommand
                 IScanArguments a => new ScanCommand(a, _fileSystemLink, _fileSystemScanner, _scanOutput),
                 ICreateArguments a => new CreateCommand(a, _fileSystemLink, _fileWrap, _directoryWrap),
                 IDeleteArguments a => new DeleteCommand(a, _fileWrap, _directoryWrap),
-                IRelinkArguments a => new RelinkCommand(a, _fileSystemLink, _fileWrap, _directoryWrap),
+                IRelinkArguments a => new RelinkCommand(a, _hardLink, _junction, _symbolicLink, _fileSystemLink),
                 IReparseArguments a => new ReparseCommand(a, _reparseOutput, _fileSystemLink),
                 _ => throw new ArgumentException($"Unknown command argument type '{commandArguments.GetType()}'")
             };

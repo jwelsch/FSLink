@@ -33,11 +33,11 @@ namespace FSLinkLib
 
         bool IsSymbolicLink(string path);
 
-        bool CreateHardLink(string hardLinkPath, string targetFilePath);
+        void CreateHardLink(string hardLinkPath, string targetFilePath);
 
-        bool CreateJunction(string junctionPath, string targetDirectoryPath);
+        void CreateJunction(string junctionPath, string targetDirectoryPath);
 
-        bool CreateSymbolicLink(string symbolicLinkPath, string targetPath, SymbolicLinkType linkType);
+        void CreateSymbolicLink(string symbolicLinkPath, string targetPath, SymbolicLinkType linkType);
 
         void DeleteHardLink(string hardLinkPath);
 
@@ -46,6 +46,8 @@ namespace FSLinkLib
         void DeleteSymbolicLink(string symbolicLinkPath);
 
         IReparsePoint? GetReparsePoint(string path);
+
+        void DeleteReparsePoint(string path);
     }
 
     /// <summary>
@@ -60,113 +62,53 @@ namespace FSLinkLib
             _nativeMethodCaller = nativeMethodCaller;
         }
 
-        /// <summary>
-        /// Gets the target of the specified reparse point.
-        /// </summary>
-        /// <param name="instance">The object of FileInfo or DirectoryInfo type.</param>
-        /// <returns>The target of the reparse point.</returns>
-        public string? GetTarget(FileSystemInfo fileInfo)
-        {
-            return WinInternalGetTarget(fileInfo.FullName);
-        }
-
-        public FileSystemLinkType GetLinkType(FileSystemInfo fileInfo)
-        {
-            return WinInternalGetLinkType(fileInfo.FullName);
-        }
-
-        private FileSystemLinkType WinInternalGetLinkType(string filePath)
+        public FileSystemLinkType GetLinkType(string path)
         {
             // We set accessMode parameter to zero because documentation says:
             // If this parameter is zero, the application can query certain metadata
             // such as file, directory, or device attributes without accessing
             // that file or device, even if GENERIC_READ access would have been denied.
-            using (var handle = OpenReparsePoint(filePath, FileDesiredAccess.GenericZero))
-            {
-                var outBufferSize = Marshal.SizeOf<REPARSE_DATA_BUFFER_SYMBOLICLINK>();
+            using var handle = OpenReparsePoint(path, FileDesiredAccess.GenericZero);
 
-                var outBuffer = Marshal.AllocHGlobal(outBufferSize);
-                var success = false;
+            var outBufferSize = Marshal.SizeOf<REPARSE_DATA_BUFFER_SYMBOLICLINK>();
 
-                try
-                {
-                    var bytesReturned = 0;
-
-                    // OACR warning 62001 about using DeviceIOControl has been disabled.
-                    // According to MSDN guidance DangerousAddRef() and DangerousRelease() have been used.
-                    handle.DangerousAddRef(ref success);
-
-                    // Get Buffer size
-                    var dangerousHandle = handle.DangerousGetHandle();
-
-                    var result = _nativeMethodCaller.DeviceIoControl(dangerousHandle,
-                                                                     Constants.FSCTL_GET_REPARSE_POINT,
-                                                                     IntPtr.Zero,
-                                                                     0,
-                                                                     outBuffer,
-                                                                     outBufferSize,
-                                                                     out bytesReturned,
-                                                                     IntPtr.Zero);
-
-                    if (!result)
-                    {
-                        // It's not a reparse point or the file system doesn't support reparse points.
-                        return IsHardLink(ref dangerousHandle) ? FileSystemLinkType.HardLink : FileSystemLinkType.None;
-                    }
-
-                    var reparseDataBuffer = Marshal.PtrToStructure<REPARSE_DATA_BUFFER_SYMBOLICLINK>(outBuffer);
-
-                    return reparseDataBuffer.ReparseTag switch
-                    {
-                        Constants.IO_REPARSE_TAG_SYMLINK => FileSystemLinkType.SymbolicLink,
-                        Constants.IO_REPARSE_TAG_MOUNT_POINT => FileSystemLinkType.Junction,
-                        _ => FileSystemLinkType.None,
-                    };
-                }
-                finally
-                {
-                    if (success)
-                    {
-                        handle.DangerousRelease();
-                    }
-
-                    Marshal.FreeHGlobal(outBuffer);
-                }
-            }
-        }
-
-        private bool WinIsHardLink(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException($"The file at path '{filePath}' does not exist.", filePath);
-            }
-
-            var attributes = File.GetAttributes(filePath);
-
-            // only check for hard link if the item is not directory
-            if ((attributes & System.IO.FileAttributes.Directory) != System.IO.FileAttributes.Directory)
-            {
-                return false;
-            }
-
-            var nativeHandle = _nativeMethodCaller.CreateFile(filePath,
-                                                              FileDesiredAccess.GenericRead,
-                                                              FileShareMode.Read,
-                                                              IntPtr.Zero,
-                                                              FileCreationDisposition.OpenExisting,
-                                                              PInvoke.FileAttributes.Normal,
-                                                              IntPtr.Zero);
-
-            using var handle = new SafeFileHandle(nativeHandle, true);
+            var outBuffer = Marshal.AllocHGlobal(outBufferSize);
             var success = false;
 
             try
             {
+                var bytesReturned = 0;
+
+                // OACR warning 62001 about using DeviceIOControl has been disabled.
+                // According to MSDN guidance DangerousAddRef() and DangerousRelease() have been used.
                 handle.DangerousAddRef(ref success);
+
+                // Get Buffer size
                 var dangerousHandle = handle.DangerousGetHandle();
 
-                return IsHardLink(ref dangerousHandle);
+                var result = _nativeMethodCaller.DeviceIoControl(dangerousHandle,
+                                                                 Constants.FSCTL_GET_REPARSE_POINT,
+                                                                 IntPtr.Zero,
+                                                                 0,
+                                                                 outBuffer,
+                                                                 outBufferSize,
+                                                                 out bytesReturned,
+                                                                 IntPtr.Zero);
+
+                if (!result)
+                {
+                    // It's not a reparse point or the file system doesn't support reparse points.
+                    return IsHardLink(ref dangerousHandle) ? FileSystemLinkType.HardLink : FileSystemLinkType.None;
+                }
+
+                var reparseDataBuffer = Marshal.PtrToStructure<REPARSE_DATA_BUFFER_SYMBOLICLINK>(outBuffer);
+
+                return reparseDataBuffer.ReparseTag switch
+                {
+                    Constants.IO_REPARSE_TAG_SYMLINK => FileSystemLinkType.SymbolicLink,
+                    Constants.IO_REPARSE_TAG_MOUNT_POINT => FileSystemLinkType.Junction,
+                    _ => FileSystemLinkType.None,
+                };
             }
             finally
             {
@@ -174,28 +116,210 @@ namespace FSLinkLib
                 {
                     handle.DangerousRelease();
                 }
+
+                Marshal.FreeHGlobal(outBuffer);
             }
         }
 
-        private bool WinIsHardLink(ref IntPtr handle)
-        {
-            var succeeded = _nativeMethodCaller.GetFileInformationByHandle(handle, out BY_HANDLE_FILE_INFORMATION handleInfo);
-            return succeeded && (handleInfo.NumberOfLinks > 1);
-        }
-
-        private bool IsHardLink(ref IntPtr handle)
-        {
-            return WinIsHardLink(ref handle);
-        }
-
-        private string? WinInternalGetTarget(string path)
+        public string? GetLinkTarget(string path)
         {
             // We set accessMode parameter to zero because documentation says:
             // If this parameter is zero, the application can query certain metadata
             // such as file, directory, or device attributes without accessing
             // that file or device, even if GENERIC_READ access would have been denied.
             using var handle = OpenReparsePoint(path, FileDesiredAccess.GenericZero);
+
             return WinInternalGetTarget(handle);
+        }
+
+        public bool IsHardLink(string filePath)
+        {
+            return GetLinkType(filePath) == FileSystemLinkType.HardLink;
+        }
+
+        public bool IsJunction(string directoryPath)
+        {
+            return GetLinkType(directoryPath) == FileSystemLinkType.Junction;
+        }
+
+        public bool IsSymbolicLink(string path)
+        {
+            return GetLinkType(path) == FileSystemLinkType.SymbolicLink;
+        }
+
+        public void CreateHardLink(string hardLinkPath, string targetFilePath)
+        {
+            var result = _nativeMethodCaller.CreateHardLink(hardLinkPath, targetFilePath, IntPtr.Zero);
+
+            if (!result)
+            {
+                var error = Marshal.GetLastWin32Error();
+                throw new Win32Exception(error, $"Error creating hard link for path '{hardLinkPath}'");
+            }
+        }
+
+        public void CreateJunction(string junctionPath, string targetDirectoryPath)
+        {
+            if (string.IsNullOrEmpty(junctionPath))
+            {
+                throw new ArgumentNullException(nameof(junctionPath));
+            }
+
+            if (string.IsNullOrEmpty(targetDirectoryPath))
+            {
+                throw new ArgumentNullException(nameof(targetDirectoryPath));
+            }
+
+            using var handle = OpenReparsePoint(junctionPath, FileDesiredAccess.GenericWrite);
+
+            var mountPointBytes = Encoding.Unicode.GetBytes(Constants.NonInterpretedPathPrefix + Path.GetFullPath(targetDirectoryPath));
+
+            var mountPoint = new REPARSE_DATA_BUFFER_MOUNTPOINT();
+            mountPoint.ReparseTag = Constants.IO_REPARSE_TAG_MOUNT_POINT;
+            mountPoint.ReparseDataLength = (ushort)(mountPointBytes.Length + 12); // Added space for the header and null endo
+            mountPoint.SubstituteNameOffset = 0;
+            mountPoint.SubstituteNameLength = (ushort)mountPointBytes.Length;
+            mountPoint.PrintNameOffset = (ushort)(mountPointBytes.Length + 2); // 2 as unicode null take 2 bytes.
+            mountPoint.PrintNameLength = 0;
+            mountPoint.PathBuffer = new byte[0x3FF0]; // Buffer for max size.
+            Array.Copy(mountPointBytes, mountPoint.PathBuffer, mountPointBytes.Length);
+
+            var nativeBufferSize = Marshal.SizeOf(mountPoint);
+            var nativeBuffer = Marshal.AllocHGlobal(nativeBufferSize);
+            var success = false;
+
+            try
+            {
+                Marshal.StructureToPtr(mountPoint, nativeBuffer, false);
+
+                // OACR warning 62001 about using DeviceIOControl has been disabled.
+                // According to MSDN guidance DangerousAddRef() and DangerousRelease() have been used.
+                handle.DangerousAddRef(ref success);
+
+                var result = _nativeMethodCaller.DeviceIoControl(handle.DangerousGetHandle(), Constants.FSCTL_SET_REPARSE_POINT, nativeBuffer, mountPointBytes.Length + 20, IntPtr.Zero, 0, out int bytesReturned, IntPtr.Zero);
+
+                if (!result)
+                {
+                    throw new Win32Exception(Marshal.GetLastWin32Error(), $"Error setting reparse point for path '{junctionPath}'");
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(nativeBuffer);
+
+                if (success)
+                {
+                    handle.DangerousRelease();
+                }
+            }
+        }
+
+        public void CreateSymbolicLink(string symbolicLinkPath, string targetPath, SymbolicLinkType linkType)
+        {
+            var flag = linkType switch
+            {
+                SymbolicLinkType.File => SYMBOLIC_LINK_FLAG.File,
+                SymbolicLinkType.Directory => SYMBOLIC_LINK_FLAG.Directory,
+                _ => throw new ArgumentException($"Unknown {nameof(SymbolicLinkType)} value '{linkType}'.", nameof(linkType))
+            };
+
+            var result = _nativeMethodCaller.CreateSymbolicLink(symbolicLinkPath, targetPath, flag);
+
+            if (!result)
+            {
+                var error = Marshal.GetLastWin32Error();
+                throw new Win32Exception(error, $"Error creating symbolic link at path '{symbolicLinkPath}' with target '{targetPath}'");
+            }
+        }
+
+        public void DeleteHardLink(string hardLinkPath)
+        {
+            File.Delete(hardLinkPath);
+        }
+
+        public void DeleteJunction(string junctionPath)
+        {
+            Directory.Delete(junctionPath);
+        }
+
+        public void DeleteSymbolicLink(string symbolicLinkPath)
+        {
+            if ((File.GetAttributes(symbolicLinkPath) & System.IO.FileAttributes.Directory) == System.IO.FileAttributes.Directory)
+            {
+                Directory.Delete(symbolicLinkPath);
+            }
+            else
+            {
+                File.Delete(symbolicLinkPath);
+            }
+        }
+
+        public IReparsePoint? GetReparsePoint(string path)
+        {
+            WIN32_FIND_DATA findData;
+            IntPtr findHandle = default;
+
+            try
+            {
+                findHandle = _nativeMethodCaller.FindFirstFileEx(path, FINDEX_INFO_LEVELS.FindExInfoBasic, out findData, FINDEX_SEARCH_OPS.FindExSearchNameMatch, IntPtr.Zero, 0);
+
+                if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
+                {
+                    if ((findData.dwFileAttributes & (uint)System.IO.FileAttributes.ReparsePoint) == (uint)System.IO.FileAttributes.ReparsePoint)
+                    {
+                        return new ReparsePoint(path, (System.IO.FileAttributes)findData.dwFileAttributes, new ReparseTag(findData.dwReserved0));
+                    }
+                }
+
+                var lastError = Marshal.GetLastWin32Error();
+
+                if (lastError != 0)
+                {
+                    throw new Win32Exception(lastError, $"Error getting reparse point data for path '{path}'");
+                }
+            }
+            finally
+            {
+                if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
+                {
+                    _nativeMethodCaller.FindClose(findHandle);
+                }
+            }
+
+            return null;
+        }
+
+        public void DeleteReparsePoint(string path)
+        {
+            var fileHandle = OpenReparsePoint(path, FileDesiredAccess.GenericAll);
+
+            var success = false;
+
+            try
+            {
+                fileHandle.DangerousAddRef(ref success);
+
+                var result = _nativeMethodCaller.DeviceIoControl(fileHandle.DangerousGetHandle(), Constants.FSCTL_DELETE_REPARSE_POINT, IntPtr.Zero, 0, IntPtr.Zero, 0, out int bytesReturned, IntPtr.Zero);
+
+                if (!result)
+                {
+                    var error = Marshal.GetLastWin32Error();
+                    throw new Win32Exception(error, $"Error deleting reparse point for path '{path}'");
+                }
+            }
+            finally
+            {
+                if (success)
+                {
+                    fileHandle.DangerousRelease();
+                }
+            }
+        }
+
+        private bool IsHardLink(ref IntPtr handle)
+        {
+            var succeeded = _nativeMethodCaller.GetFileInformationByHandle(handle, out BY_HANDLE_FILE_INFORMATION handleInfo);
+            return succeeded && (handleInfo.NumberOfLinks > 1);
         }
 
         private string? WinInternalGetTarget(SafeFileHandle handle)
@@ -263,75 +387,7 @@ namespace FSLinkLib
             }
         }
 
-        private bool WinCreateJunction(string path, string target)
-        {
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (!string.IsNullOrEmpty(target))
-                {
-                    using (var handle = OpenReparsePoint(path, FileDesiredAccess.GenericWrite))
-                    {
-                        var mountPointBytes = Encoding.Unicode.GetBytes(Constants.NonInterpretedPathPrefix + Path.GetFullPath(target));
-
-                        var mountPoint = new REPARSE_DATA_BUFFER_MOUNTPOINT();
-                        mountPoint.ReparseTag = Constants.IO_REPARSE_TAG_MOUNT_POINT;
-                        mountPoint.ReparseDataLength = (ushort)(mountPointBytes.Length + 12); // Added space for the header and null endo
-                        mountPoint.SubstituteNameOffset = 0;
-                        mountPoint.SubstituteNameLength = (ushort)mountPointBytes.Length;
-                        mountPoint.PrintNameOffset = (ushort)(mountPointBytes.Length + 2); // 2 as unicode null take 2 bytes.
-                        mountPoint.PrintNameLength = 0;
-                        mountPoint.PathBuffer = new byte[0x3FF0]; // Buffer for max size.
-                        Array.Copy(mountPointBytes, mountPoint.PathBuffer, mountPointBytes.Length);
-
-                        var nativeBufferSize = Marshal.SizeOf(mountPoint);
-                        var nativeBuffer = Marshal.AllocHGlobal(nativeBufferSize);
-                        var success = false;
-
-                        try
-                        {
-                            Marshal.StructureToPtr(mountPoint, nativeBuffer, false);
-
-                            // OACR warning 62001 about using DeviceIOControl has been disabled.
-                            // According to MSDN guidance DangerousAddRef() and DangerousRelease() have been used.
-                            handle.DangerousAddRef(ref success);
-
-                            var result = _nativeMethodCaller.DeviceIoControl(handle.DangerousGetHandle(), Constants.FSCTL_SET_REPARSE_POINT, nativeBuffer, mountPointBytes.Length + 20, IntPtr.Zero, 0, out int bytesReturned, IntPtr.Zero);
-
-                            if (!result)
-                            {
-                                throw new Win32Exception(Marshal.GetLastWin32Error());
-                            }
-
-                            return result;
-                        }
-                        finally
-                        {
-                            Marshal.FreeHGlobal(nativeBuffer);
-
-                            if (success)
-                            {
-                                handle.DangerousRelease();
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    throw new ArgumentNullException(nameof(target));
-                }
-            }
-            else
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-        }
-
         private SafeFileHandle OpenReparsePoint(string reparsePoint, FileDesiredAccess accessMode)
-        {
-            return WinOpenReparsePoint(reparsePoint, accessMode);
-        }
-
-        private SafeFileHandle WinOpenReparsePoint(string reparsePoint, FileDesiredAccess accessMode)
         {
             var nativeHandle = _nativeMethodCaller.CreateFile(reparsePoint,
                                                               accessMode,
@@ -345,114 +401,10 @@ namespace FSLinkLib
 
             if (lastError != 0)
             {
-                throw new Win32Exception(lastError);
+                throw new Win32Exception(lastError, $"Error accessing reparse point for path '{reparsePoint}'");
             }
 
             return new SafeFileHandle(nativeHandle, true);
-        }
-
-        public FileSystemLinkType GetLinkType(string path)
-        {
-            return WinInternalGetLinkType(path);
-        }
-
-        public string? GetLinkTarget(string path)
-        {
-            return WinInternalGetTarget(path);
-        }
-
-        public bool IsHardLink(string filePath)
-        {
-            return GetLinkType(filePath) == FileSystemLinkType.HardLink;
-        }
-
-        public bool IsJunction(string directoryPath)
-        {
-            return GetLinkType(directoryPath) == FileSystemLinkType.Junction;
-        }
-
-        public bool IsSymbolicLink(string path)
-        {
-            return GetLinkType(path) == FileSystemLinkType.SymbolicLink;
-        }
-
-        public bool CreateHardLink(string hardLinkPath, string targetFilePath)
-        {
-            return _nativeMethodCaller.CreateHardLink(hardLinkPath, targetFilePath, IntPtr.Zero);
-        }
-
-        public bool CreateJunction(string junctionPath, string targetDirectoryPath)
-        {
-            return WinCreateJunction(junctionPath, targetDirectoryPath);
-        }
-
-        public bool CreateSymbolicLink(string symbolicLinkPath, string targetPath, SymbolicLinkType linkType)
-        {
-            var flag = linkType switch
-            {
-                SymbolicLinkType.File => SYMBOLIC_LINK_FLAG.File,
-                SymbolicLinkType.Directory => SYMBOLIC_LINK_FLAG.Directory,
-                _ => throw new ArgumentException($"Unknown {nameof(SymbolicLinkType)} value '{linkType}'.", nameof(linkType))
-            };
-
-            return _nativeMethodCaller.CreateSymbolicLink(symbolicLinkPath, targetPath, flag);
-        }
-
-        public void DeleteHardLink(string hardLinkPath)
-        {
-            File.Delete(hardLinkPath);
-        }
-
-        public void DeleteJunction(string junctionPath)
-        {
-            Directory.Delete(junctionPath);
-        }
-
-        public void DeleteSymbolicLink(string symbolicLinkPath)
-        {
-            if ((File.GetAttributes(symbolicLinkPath) & System.IO.FileAttributes.Directory) == System.IO.FileAttributes.Directory)
-            {
-                Directory.Delete(symbolicLinkPath);
-            }
-            else
-            {
-                File.Delete(symbolicLinkPath);
-            }
-        }
-
-        public IReparsePoint? GetReparsePoint(string path)
-        {
-            WIN32_FIND_DATA findData;
-            IntPtr findHandle = default;
-
-            try
-            {
-                findHandle = _nativeMethodCaller.FindFirstFileEx(path, FINDEX_INFO_LEVELS.FindExInfoBasic, out findData, FINDEX_SEARCH_OPS.FindExSearchNameMatch, IntPtr.Zero, 0);
-
-                if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
-                {
-                    if ((findData.dwFileAttributes & (uint)System.IO.FileAttributes.ReparsePoint) == (uint)System.IO.FileAttributes.ReparsePoint)
-                    {
-                        return new ReparsePoint(path, (System.IO.FileAttributes)findData.dwFileAttributes, new ReparseTag(findData.dwReserved0));
-                    }
-                }
-
-                var lastError = Marshal.GetLastWin32Error();
-
-                if (lastError != 0)
-                {
-                    throw new Win32Exception(lastError, $"Error getting reparse point data for path '{path}'");
-                }
-            }
-            finally
-            {
-                if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
-                {
-                    _nativeMethodCaller.FindClose(findHandle);
-                }
-            }
-
-            return null;
         }
 
         //public static bool IsReparsePoint(FileSystemInfo fileInfo)

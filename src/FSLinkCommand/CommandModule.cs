@@ -1,7 +1,8 @@
 ﻿using Autofac;
-using FSLinkCommand.Scan;
+using FSLinkCommand.Command.Scan;
+using FSLinkCommand.FileSystem;
 
-namespace FSLinkCommand
+namespace FSLinkCommand.Command
 {
     public class CommandModule : Module
     {
@@ -9,6 +10,11 @@ namespace FSLinkCommand
         {
             // Scanning
             builder.RegisterType<FileSystemScanner>().As<IFileSystemScanner>();
+
+            // File system
+            builder.RegisterType<HardLink>().As<IHardLink>();
+            builder.RegisterType<Junction>().As<IJunction>();
+            builder.RegisterType<SymbolicLink>().As<ISymbolicLink>();
         }
     }
 }

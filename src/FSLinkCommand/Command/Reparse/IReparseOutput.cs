@@ -1,6 +1,6 @@
 ﻿using FSLinkLib;
 
-namespace FSLinkCommand.Reparse
+namespace FSLinkCommand.Command.Reparse
 {
     public interface IReparseOutput
     {

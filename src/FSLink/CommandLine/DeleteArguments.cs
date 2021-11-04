@@ -1,5 +1,5 @@
 ﻿using CommandLine;
-using FSLinkCommand.Delete;
+using FSLinkCommand.Command.Delete;
 
 namespace FSLink.CommandLine
 {

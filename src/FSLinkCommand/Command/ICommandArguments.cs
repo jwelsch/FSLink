@@ -1,4 +1,4 @@
-﻿namespace FSLinkCommand
+﻿namespace FSLinkCommand.Command
 {
     public interface ICommandArguments
     {

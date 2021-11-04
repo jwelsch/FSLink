@@ -4,15 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FSLinkCommand.Scan
+namespace FSLinkCommand.Command.Scan
 {
-    public interface IScanArguments : ICommandArguments
-    {
-        string Path { get; }
-
-        bool Recurse { get; }
-    }
-
     public class ScanCommand : ICommandBase
     {
         private readonly IScanArguments _commandArguments;

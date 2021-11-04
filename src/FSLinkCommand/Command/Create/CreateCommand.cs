@@ -4,17 +4,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FSLinkCommand.Create
+namespace FSLinkCommand.Command.Create
 {
-    public interface ICreateArguments : ICommandArguments
-    {
-        FileSystemLinkType LinkType { get; }
-
-        string LinkPath { get; }
-
-        string TargetPath { get; }
-    }
-
     public class CreateArguments : ICreateArguments
     {
         public FileSystemLinkType LinkType { get; }

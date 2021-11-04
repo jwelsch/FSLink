@@ -2,18 +2,8 @@
 using System;
 using System.Threading.Tasks;
 
-namespace FSLinkCommand.Delete
+namespace FSLinkCommand.Command.Delete
 {
-    public interface IDeleteArguments : ICommandArguments
-    {
-        string Path { get; }
-    }
-
-    public class DeleteArguments : IDeleteArguments
-    {
-        public string Path { get; set; }
-    }
-
     public class DeleteCommand : ICommandBase
     {
         private readonly IDeleteArguments _commandArguments;

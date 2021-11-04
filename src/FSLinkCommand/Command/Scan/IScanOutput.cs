@@ -3,7 +3,7 @@ using System;
 
 #nullable enable
 
-namespace FSLinkCommand.Scan
+namespace FSLinkCommand.Command.Scan
 {
     public interface IScanOutput
     {
