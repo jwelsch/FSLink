@@ -1,4 +1,6 @@
-﻿using FSLinkLib;
+﻿using FSLinkLib.ReparsePoints;
+
+#nullable enable
 
 namespace FSLinkCommand.Command.Reparse
 {

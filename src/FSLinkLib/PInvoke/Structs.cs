@@ -3,7 +3,7 @@
 namespace FSLinkLib.PInvoke
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct REPARSE_DATA_BUFFER_SYMBOLICLINK
+    public struct REPARSE_DATA_BUFFER_SYMBOLICLINK
     {
         public uint ReparseTag;
         public ushort ReparseDataLength;
@@ -19,7 +19,7 @@ namespace FSLinkLib.PInvoke
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct REPARSE_DATA_BUFFER_MOUNTPOINT
+    public struct REPARSE_DATA_BUFFER_MOUNTPOINT
     {
         public uint ReparseTag;
         public ushort ReparseDataLength;
@@ -34,7 +34,7 @@ namespace FSLinkLib.PInvoke
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct BY_HANDLE_FILE_INFORMATION
+    public struct BY_HANDLE_FILE_INFORMATION
     {
         public uint FileAttributes;
         public System.Runtime.InteropServices.ComTypes.FILETIME CreationTime;
@@ -49,7 +49,7 @@ namespace FSLinkLib.PInvoke
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct GUID
+    public struct GUID
     {
         public uint Data1;
         public ushort Data2;
@@ -59,20 +59,8 @@ namespace FSLinkLib.PInvoke
         public char[] Data4;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct REPARSE_GUID_DATA_BUFFER
-    {
-        public uint ReparseTag;
-        public ushort ReparseDataLength;
-        public ushort Reserved;
-        public GUID ReparseGuid;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.MAX_REPARSE_SIZE)]
-        public char[] DataBuffer;
-    }
-
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct WIN32_FIND_DATA
+    public struct WIN32_FIND_DATA
     {
         public uint dwFileAttributes;
         public System.Runtime.InteropServices.ComTypes.FILETIME ftCreationTime;
@@ -88,4 +76,62 @@ namespace FSLinkLib.PInvoke
         public string cAlternateFileName;
     }
 
+    /// <summary>
+    /// Maximum size is 16 Kb.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct REPARSE_DATA_BUFFER
+    {
+        // Header - 8 bytes
+        public uint ReparseTag;
+        public ushort ReparseDataLength;
+        public ushort Reserved;
+
+        // Reparse point data
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF8)] // 16 Kb - 8 bytes
+        public byte[] DataBuffer;
+
+        //
+        // The array causes issues here because a non-object type (e.g., ushort, uint) can't overlap an object (the byte[]).
+        //
+
+        //// REPARSE_DATA_BUFFER_SYMBOLICLINK
+        //// 16 bytes
+        //[FieldOffset(8)]
+        //public ushort SymLinkSubstituteNameOffset;
+
+        //[FieldOffset(10)]
+        //public ushort SymLinkSubstituteNameLength;
+
+        //[FieldOffset(12)]
+        //public ushort SymLinkPrintNameOffset;
+
+        //[FieldOffset(14)]
+        //public ushort SymLinkPrintNameLength;
+
+        //[FieldOffset(16)]
+        //public uint SymLinkFlags;
+
+        //[FieldOffset(20)]
+        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF0)] // 16 Kb - 16 bytes
+        //public byte[] SymLinkPathBuffer;
+
+        //// REPARSE_DATA_BUFFER_MOUNTPOINT
+        //// 12 bytes
+        //[FieldOffset(8)]
+        //public ushort MntPtSubstituteNameOffset;
+
+        //[FieldOffset(10)]
+        //public ushort MntPtSubstituteNameLength;
+
+        //[FieldOffset(12)]
+        //public ushort MntPtPrintNameOffset;
+
+        //[FieldOffset(14)]
+        //public ushort MntPtPrintNameLength;
+
+        //[FieldOffset(18)]
+        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF4)] // 16 Kb - 12 bytes
+        //public byte[] MntPtPathBuffer;
+    }
 }

@@ -1,4 +1,6 @@
-﻿using FSLinkLib.PInvoke;
+﻿using FSLinkCommon.Wraps;
+using FSLinkLib.PInvoke;
+using FSLinkLib.ReparsePoints;
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.ComponentModel;
@@ -56,10 +58,12 @@ namespace FSLinkLib
     internal class FileSystemLink : IFileSystemLink
     {
         private readonly INativeMethodCaller _nativeMethodCaller;
+        private readonly IFileWrap _fileWrap;
 
-        public FileSystemLink(INativeMethodCaller nativeMethodCaller)
+        public FileSystemLink(INativeMethodCaller nativeMethodCaller, IFileWrap fileWrap)
         {
             _nativeMethodCaller = nativeMethodCaller;
+            _fileWrap = fileWrap;
         }
 
         public FileSystemLinkType GetLinkType(string path)
@@ -254,22 +258,61 @@ namespace FSLinkLib
             }
         }
 
+        //public IReparsePoint? GetReparsePoint(string path)
+        //{
+        //    WIN32_FIND_DATA findData;
+        //    IntPtr findHandle = default;
+
+        //    try
+        //    {
+        //        findHandle = _nativeMethodCaller.FindFirstFileEx(path, FINDEX_INFO_LEVELS.FindExInfoBasic, out findData, FINDEX_SEARCH_OPS.FindExSearchNameMatch, IntPtr.Zero, 0);
+
+        //        if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
+        //        {
+        //            if ((findData.dwFileAttributes & (uint)System.IO.FileAttributes.ReparsePoint) == (uint)System.IO.FileAttributes.ReparsePoint)
+        //            {
+        //                return new ReparsePoint(path, (System.IO.FileAttributes)findData.dwFileAttributes, new ReparseTag(findData.dwReserved0), 0, 0);
+        //            }
+        //        }
+
+        //        var lastError = Marshal.GetLastWin32Error();
+
+        //        if (lastError != 0)
+        //        {
+        //            throw new Win32Exception(lastError, $"Error getting reparse point data for path '{path}'");
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
+        //        {
+        //            _nativeMethodCaller.FindClose(findHandle);
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
         public IReparsePoint? GetReparsePoint(string path)
         {
-            WIN32_FIND_DATA findData;
-            IntPtr findHandle = default;
+            var handle = OpenReparsePoint(path, FileDesiredAccess.GenericZero);
+
+            var outBufferSize = Marshal.SizeOf<REPARSE_DATA_BUFFER>();
+            var outBuffer = Marshal.AllocHGlobal(outBufferSize);
+            var success = false;
 
             try
             {
-                findHandle = _nativeMethodCaller.FindFirstFileEx(path, FINDEX_INFO_LEVELS.FindExInfoBasic, out findData, FINDEX_SEARCH_OPS.FindExSearchNameMatch, IntPtr.Zero, 0);
+                handle.DangerousAddRef(ref success);
 
-                if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
-                {
-                    if ((findData.dwFileAttributes & (uint)System.IO.FileAttributes.ReparsePoint) == (uint)System.IO.FileAttributes.ReparsePoint)
-                    {
-                        return new ReparsePoint(path, (System.IO.FileAttributes)findData.dwFileAttributes, new ReparseTag(findData.dwReserved0));
-                    }
-                }
+                var result = _nativeMethodCaller.DeviceIoControl(handle.DangerousGetHandle(),
+                                                                 Constants.FSCTL_GET_REPARSE_POINT,
+                                                                 IntPtr.Zero,
+                                                                 0,
+                                                                 outBuffer,
+                                                                 outBufferSize,
+                                                                 out int bytesReturned,
+                                                                 IntPtr.Zero);
 
                 var lastError = Marshal.GetLastWin32Error();
 
@@ -277,16 +320,41 @@ namespace FSLinkLib
                 {
                     throw new Win32Exception(lastError, $"Error getting reparse point data for path '{path}'");
                 }
+
+                var dataBuffer = Marshal.PtrToStructure<REPARSE_DATA_BUFFER>(outBuffer);
+                var tagValue = ReparsePointBase.LookUpTag(new ReparseTag(dataBuffer.ReparseTag));
+                var attributes = _fileWrap.GetAttributes(path);
+
+                if (tagValue == ReparseTagValues.IO_REPARSE_TAG_SYMLINK)
+                {
+                    return new SymbolicLinkReparsePoint(path,
+                                                        attributes,
+                                                        Marshal.PtrToStructure<REPARSE_DATA_BUFFER_SYMBOLICLINK>(outBuffer));
+                }
+                else if (tagValue == ReparseTagValues.IO_REPARSE_TAG_MOUNT_POINT)
+                {
+                    return new MountPointReparsePoint(path,
+                                                      attributes,
+                                                      Marshal.PtrToStructure<REPARSE_DATA_BUFFER_MOUNTPOINT>(outBuffer));
+                }
+                else
+                {
+                    return new DataReparsePoint(path, attributes, dataBuffer);
+                }
             }
             finally
             {
-                if (findHandle.ToInt64() != -1 && findHandle != IntPtr.Zero)
+                if (success)
                 {
-                    _nativeMethodCaller.FindClose(findHandle);
+                    handle.DangerousRelease();
                 }
+
+                Marshal.FreeHGlobal(outBuffer);
             }
 
+#pragma warning disable CS0162 // Unreachable code detected
             return null;
+#pragma warning restore CS0162 // Unreachable code detected
         }
 
         public void DeleteReparsePoint(string path)

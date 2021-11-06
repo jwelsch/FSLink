@@ -1,4 +1,6 @@
-﻿namespace FSLinkLib
+﻿#nullable enable
+
+namespace FSLinkLib.ReparsePoints
 {
     //
     // Reparse tags are stored as DWORD values. The bits define certain attributes, as shown in the following diagram.
@@ -22,6 +24,8 @@
 
     public interface IReparseTag
     {
+        uint RawData { get; }
+
         bool IsMicrosoft { get; }
 
         bool IsNameSurrogate { get; }
@@ -46,6 +50,7 @@
 
         private readonly uint _data;
 
+        public uint RawData => _data;
         public bool IsMicrosoft => (MicrosoftMask & _data) != 0;
         public bool IsNameSurrogate => (NameSurrogateMask & _data) != 0;
         public bool ReservedFlag0 => (ReservedFlag0Mask & _data) != 0;

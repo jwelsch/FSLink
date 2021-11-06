@@ -1,7 +1,8 @@
-﻿namespace FSLinkLib
+﻿namespace FSLinkLib.ReparsePoints
 {
     public enum ReparseTagValues : uint
     {
+        IO_REPARSE_NONE = 0x00000000U,
         IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003U,
         IO_REPARSE_TAG_HSM = 0xC0000004U,
         IO_REPARSE_TAG_DRIVE_EXTENDER = 0x80000005U,

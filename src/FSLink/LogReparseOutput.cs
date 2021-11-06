@@ -1,6 +1,9 @@
 ﻿using FSLinkCommand.Command.Reparse;
-using FSLinkLib;
+using FSLinkCommon.Util;
+using FSLinkLib.ReparsePoints;
 using Microsoft.Extensions.Logging;
+
+#nullable enable
 
 namespace FSLink
 {
@@ -16,29 +19,25 @@ namespace FSLink
         public void OnReparsePointData(IReparsePoint reparsePoint)
         {
             var message =
-@"File system entry
-  Path:            {0}
-  IsDirectory:     {1}
-Reparse point data
-  IsMicrosoft:     {2}
-  ReservedFlag0:   {3}
-  IsNameSurrogate: {4}
-  ReservedFlag1:   {5}
-  ReservedBits:    0x{6:X4}
-  TagValue:        0x{7:X4}
-  TagName:         {8}";
+                $"File system entry" +
+                $"  Path:              {reparsePoint.Path}\r\n" +
+                $"  IsDirectory:       {reparsePoint.IsDirectory}\r\n" +
+                $"Reparse point\r\n" +
+                $"  Tag:               {reparsePoint.Tag.RawData.ToHexString()}\r\n" +
+                $"    IsMicrosoft:     {reparsePoint.Tag.IsMicrosoft}\r\n" +
+                $"    ReservedFlag0:   {reparsePoint.Tag.ReservedFlag0}\r\n" +
+                $"    IsNameSurrogate: {reparsePoint.Tag.IsNameSurrogate}\r\n" +
+                $"    ReservedFlag1:   {reparsePoint.Tag.ReservedFlag1}\r\n" +
+                $"    ReservedBits:    {reparsePoint.Tag.ReservedBits.ToHexString()}\r\n" +
+                $"    TagValue:        {reparsePoint.Tag.TagValue.ToHexString()}\r\n" +
+                $"    TagName:         {reparsePoint.TagName}\r\n" +
+                $"  DataLength:        {reparsePoint.DataLength} (0x{reparsePoint.DataLength:X4}) bytes\r\n" +
+                $"  Reserved:          {reparsePoint.Reserved.ToHexString()}\r\n" +
+                $"\r\n" +
+                $"Reparse data:\r\n" +
+                $"{reparsePoint.Data.ToHexBlock(0, (int)reparsePoint.DataLength)}";
 
-            _logger.LogInformation(string.Format(message,
-                                                 reparsePoint.Path,
-                                                 reparsePoint.IsDirectory,
-                                                 reparsePoint.Tag.IsMicrosoft,
-                                                 reparsePoint.Tag.ReservedFlag0,
-                                                 reparsePoint.Tag.IsNameSurrogate,
-                                                 reparsePoint.Tag.ReservedFlag1,
-                                                 reparsePoint.Tag.ReservedBits,
-                                                 reparsePoint.Tag.TagValue,
-                                                 reparsePoint.TagName
-            ));
+            _logger.LogInformation(message);
         }
     }
 }
