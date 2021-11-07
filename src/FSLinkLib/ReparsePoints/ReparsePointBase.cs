@@ -18,13 +18,29 @@ namespace FSLinkLib.ReparsePoints
 
         string TagName { get; }
 
+        /// <summary>
+        /// Length of reparse point data, including all data after Reserved.
+        /// </summary>
         uint DataLength { get; }
 
         uint Reserved { get; }
 
         byte[] Data { get; }
 
-        int MaxDataLength { get; }
+        /// <summary>
+        /// Maximum size of a reparse point (16 KB).
+        /// </summary>
+        uint ReparsePointMaxLength { get; }
+
+        /// <summary>
+        /// Maximum size of the data buffer for this type of reparse point.
+        /// </summary>
+        uint MaxDataBufferLength { get; }
+
+        /// <summary>
+        /// Calculated length of data buffer for this reparse point.
+        /// </summary>
+        uint DataBufferLength { get; }
     }
 
     public abstract class ReparsePointBase : IReparsePoint
@@ -45,9 +61,13 @@ namespace FSLinkLib.ReparsePoints
 
         public byte[] Data { get; }
 
-        public int MaxDataLength { get; }
+        public uint ReparsePointMaxLength => 16384; // 16 KB
 
-        protected ReparsePointBase(string path, FileAttributes attributes, uint reparseTag, uint dataLength, uint reserved, byte[] data, int maxDataLength)
+        public uint MaxDataBufferLength { get; }
+
+        public uint DataBufferLength => DataLength - (ReparsePointMaxLength - MaxDataBufferLength);
+
+        protected ReparsePointBase(string path, FileAttributes attributes, uint reparseTag, uint dataLength, uint reserved, byte[] data, uint maxDataBufferLength)
         {
             Path = path;
             Attributes = attributes;
@@ -56,7 +76,7 @@ namespace FSLinkLib.ReparsePoints
             DataLength = dataLength;
             Reserved = reserved;
             Data = data;
-            MaxDataLength = maxDataLength;
+            MaxDataBufferLength = maxDataBufferLength;
         }
 
         public static string LookUpTagName(IReparseTag reparseTag)

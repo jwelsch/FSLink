@@ -19,7 +19,7 @@ namespace FSLink
         public void OnReparsePointData(IReparsePoint reparsePoint)
         {
             var message =
-                $"File system entry" +
+                $"File system entry\r\n" +
                 $"  Path:              {reparsePoint.Path}\r\n" +
                 $"  IsDirectory:       {reparsePoint.IsDirectory}\r\n" +
                 $"Reparse point\r\n" +
@@ -35,7 +35,7 @@ namespace FSLink
                 $"  Reserved:          {reparsePoint.Reserved.ToHexString()}\r\n" +
                 $"\r\n" +
                 $"Reparse data:\r\n" +
-                $"{reparsePoint.Data.ToHexBlock(0, (int)reparsePoint.DataLength)}";
+                $"{reparsePoint.Data.ToHexBlock(0, (int)reparsePoint.DataBufferLength)}";
 
             _logger.LogInformation(message);
         }
