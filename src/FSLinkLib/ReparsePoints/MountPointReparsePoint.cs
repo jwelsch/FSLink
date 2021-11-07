@@ -15,7 +15,7 @@ namespace FSLinkLib.ReparsePoints
         ushort PrintNameLength { get; }
     }
 
-    public class MountPointReparsePoint : ReparsePointBase, IReparsePoint
+    public class MountPointReparsePoint : ReparsePointBase, IMountPointReparsePoint
     {
         public ushort SubstituteNameOffset { get; }
 
@@ -26,7 +26,7 @@ namespace FSLinkLib.ReparsePoints
         public ushort PrintNameLength { get; }
 
         public MountPointReparsePoint(string path, System.IO.FileAttributes attributes, REPARSE_DATA_BUFFER_MOUNTPOINT dataBuffer)
-            : base(path, attributes, dataBuffer.ReparseTag, dataBuffer.ReparseDataLength, dataBuffer.Reserved, dataBuffer.PathBuffer, 0x3FF4) // 16 Kb - 12 bytes
+            : base(path, attributes, dataBuffer.ReparseTag, dataBuffer.ReparseDataLength, dataBuffer.Reserved, dataBuffer.PathBuffer, 0x3FF8) // 16 KB - 8 bytes
         {
             SubstituteNameOffset = dataBuffer.SubstituteNameOffset;
             SubstituteNameLength = dataBuffer.SubstituteNameLength;

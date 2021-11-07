@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using FSLink.CommandLine;
+using FSLink.Outputs;
 using FSLinkCommand.Command;
 using FSLinkCommand.Command.Reparse;
 using FSLinkCommand.Command.Scan;
@@ -17,7 +18,10 @@ namespace FSLink
             // Commands
             builder.RegisterType<CommandFactory>().As<ICommandFactory>();
             builder.RegisterType<LogScanOutput>().As<IScanOutput>();
-            builder.RegisterType<LogReparseOutput>().As<IReparseOutput>();
+            builder.RegisterType<LogReparseOutputFactory>().As<ILogReparseOutputFactory>();
+            builder.RegisterType<DataLogReparseOutput>().As<IReparseOutput>();
+            builder.RegisterType<SymbolicLinkLogReparseOutput>().As<ISymbolicLinkLogReparseOutput>();
+            builder.RegisterType<MountPointLogReparseOutput>().As<IMountPointLogReparseOutput>();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace FSLinkLib.PInvoke
         public ushort PrintNameLength;
         public uint Flags;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF0)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF4)] // 16 KB - 12 bytes
         public byte[] PathBuffer;
     }
 
@@ -29,7 +29,7 @@ namespace FSLinkLib.PInvoke
         public ushort PrintNameOffset;
         public ushort PrintNameLength;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF0)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF8)] // 16 KB - 8 bytes
         public byte[] PathBuffer;
     }
 
@@ -88,7 +88,7 @@ namespace FSLinkLib.PInvoke
         public ushort Reserved;
 
         // Reparse point data
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF8)] // 16 Kb - 8 bytes
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x4000)] // 16 KB
         public byte[] DataBuffer;
 
         //

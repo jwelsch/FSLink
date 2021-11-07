@@ -30,7 +30,7 @@ namespace FSLinkLib.ReparsePoints
         public uint Flags { get; }
 
         public SymbolicLinkReparsePoint(string path, System.IO.FileAttributes attributes, REPARSE_DATA_BUFFER_SYMBOLICLINK dataBuffer)
-            : base(path, attributes, dataBuffer.ReparseTag, dataBuffer.ReparseDataLength, dataBuffer.Reserved, dataBuffer.PathBuffer, 0x3FF0) // 16 Kb - 16 bytes
+            : base(path, attributes, dataBuffer.ReparseTag, dataBuffer.ReparseDataLength, dataBuffer.Reserved, dataBuffer.PathBuffer, 0x3FF4) // 16 KB - 12 bytes
         {
             SubstituteNameOffset = dataBuffer.SubstituteNameOffset;
             SubstituteNameLength = dataBuffer.SubstituteNameLength;

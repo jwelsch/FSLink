@@ -3,7 +3,7 @@ using FSLinkLib;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace FSLink
+namespace FSLink.Outputs
 {
     public class LogScanOutput : IScanOutput
     {

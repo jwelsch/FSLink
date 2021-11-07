@@ -22,19 +22,19 @@ namespace FSLinkCommand.Command
         private readonly IFileWrap _fileWrap;
         private readonly IDirectoryWrap _directoryWrap;
         private readonly IScanOutput _scanOutput;
-        private readonly IReparseOutput _reparseOutput;
+        private readonly ILogReparseOutputFactory _logReparseOutputFactory;
         private readonly IHardLink _hardLink;
         private readonly IJunction _junction;
         private readonly ISymbolicLink _symbolicLink;
 
-        public CommandFactory(IFileSystemLink fileSystemLink, IFileSystemScanner fileSystemScanner, IFileWrap fileWrap, IDirectoryWrap directoryWrap, IScanOutput scanOutput, IReparseOutput reparseOutput, IHardLink hardLink, IJunction junction, ISymbolicLink symbolicLink)
+        public CommandFactory(IFileSystemLink fileSystemLink, IFileSystemScanner fileSystemScanner, IFileWrap fileWrap, IDirectoryWrap directoryWrap, IScanOutput scanOutput, ILogReparseOutputFactory logReparseOutputFactory, IHardLink hardLink, IJunction junction, ISymbolicLink symbolicLink)
         {
             _fileSystemLink = fileSystemLink;
             _fileSystemScanner = fileSystemScanner;
             _fileWrap = fileWrap;
             _directoryWrap = directoryWrap;
             _scanOutput = scanOutput;
-            _reparseOutput = reparseOutput;
+            _logReparseOutputFactory = logReparseOutputFactory;
             _hardLink = hardLink;
             _junction = junction;
             _symbolicLink = symbolicLink;
@@ -48,7 +48,7 @@ namespace FSLinkCommand.Command
                 ICreateArguments a => new CreateCommand(a, _fileSystemLink, _fileWrap, _directoryWrap),
                 IDeleteArguments a => new DeleteCommand(a, _fileWrap, _directoryWrap),
                 IRelinkArguments a => new RelinkCommand(a, _hardLink, _junction, _symbolicLink, _fileSystemLink),
-                IReparseArguments a => new ReparseCommand(a, _reparseOutput, _fileSystemLink),
+                IReparseArguments a => new ReparseCommand(a, _logReparseOutputFactory, _fileSystemLink),
                 _ => throw new ArgumentException($"Unknown command argument type '{commandArguments.GetType()}'")
             };
         }
