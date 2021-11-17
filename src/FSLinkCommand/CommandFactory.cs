@@ -8,6 +8,8 @@ using FSLinkCommon.Wraps;
 using FSLinkLib;
 using System;
 
+#nullable enable
+
 namespace FSLinkCommand.Command
 {
     public interface ICommandFactory
