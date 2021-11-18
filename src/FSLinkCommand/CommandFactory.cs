@@ -46,11 +46,11 @@ namespace FSLinkCommand.Command
         {
             return commandArguments switch
             {
-                IScanArguments a => new ScanCommand(a, _fileSystemLink, _fileSystemScanner, _scanOutput),
-                ICreateArguments a => new CreateCommand(a, _fileSystemLink, _fileWrap, _directoryWrap),
-                IDeleteArguments a => new DeleteCommand(a, _fileWrap, _directoryWrap),
-                IRelinkArguments a => new RelinkCommand(a, _hardLink, _junction, _symbolicLink, _fileSystemLink),
-                IReparseArguments a => new ReparseCommand(a, _logReparseOutputFactory, _fileSystemLink),
+                IScanArguments _ => new ScanCommand(_fileSystemLink, _fileSystemScanner, _scanOutput),
+                ICreateArguments _ => new CreateCommand(_fileSystemLink, _fileWrap, _directoryWrap),
+                IDeleteArguments _ => new DeleteCommand(_fileWrap, _directoryWrap),
+                IRelinkArguments _ => new RelinkCommand(_hardLink, _junction, _symbolicLink, _fileSystemLink),
+                IReparseArguments _ => new ReparseCommand(_logReparseOutputFactory, _fileSystemLink),
                 _ => throw new ArgumentException($"Unknown command argument type '{commandArguments.GetType()}'")
             };
         }

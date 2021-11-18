@@ -6,38 +6,34 @@ using System.Threading.Tasks;
 
 namespace FSLinkCommand.Command.Reparse
 {
-    public class ReparseCommand : ICommandBase
+    public class ReparseCommand : CommandBase<IReparseArguments>
     {
-        private readonly IReparseArguments _commandArguments;
         private readonly ILogReparseOutputFactory _logReparseOutputFactory;
         private readonly IFileSystemLink _fileSystemLink;
 
-        public string Name => "Reparse";
-
-        public ReparseCommand(IReparseArguments commandArguments, ILogReparseOutputFactory logReparseOutputFactory, IFileSystemLink fileSystemLink)
+        public ReparseCommand(ILogReparseOutputFactory logReparseOutputFactory, IFileSystemLink fileSystemLink)
+            : base("Reparse")
         {
-            _commandArguments = commandArguments;
             _fileSystemLink = fileSystemLink;
             _logReparseOutputFactory = logReparseOutputFactory;
         }
 
-        public async Task<ICommandResult> Run()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        protected override async Task<ICommandResult> DoRun(IReparseArguments arguments)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            return await Task.Run(() =>
+            var reparsePoint = _fileSystemLink.GetReparsePoint(arguments.Path);
+
+            if (reparsePoint == null)
             {
-                var reparsePoint = _fileSystemLink.GetReparsePoint(_commandArguments.Path);
+                return new ErrorCommandResult(Name, new IOException($"Failed to get reparse point data for path '{arguments.Path}'"));
+            }
 
-                if (reparsePoint == null)
-                {
-                    return new ErrorCommandResult(Name, new IOException($"Failed to get reparse point data for path '{_commandArguments.Path}'"));
-                }
+            var output = _logReparseOutputFactory.Create(reparsePoint);
 
-                var output = _logReparseOutputFactory.Create(reparsePoint);
+            output.OnReparsePointData(reparsePoint);
 
-                output.OnReparsePointData(reparsePoint);
-
-                return (ICommandResult)new SuccessCommandResult(Name, reparsePoint);
-            });
+            return new SuccessCommandResult(Name, reparsePoint);
         }
     }
 }

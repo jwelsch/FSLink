@@ -1,39 +1,36 @@
 ﻿using FSLinkCommon.Wraps;
-using System;
 using System.Threading.Tasks;
+
+#nullable enable
 
 namespace FSLinkCommand.Command.Delete
 {
-    public class DeleteCommand : ICommandBase
+    public class DeleteCommand : CommandBase<IDeleteArguments>
     {
-        private readonly IDeleteArguments _commandArguments;
         private readonly IFileWrap _fileWrap;
         private readonly IDirectoryWrap _directoryWrap;
 
-        public string Name => "Delete";
-
-        public DeleteCommand(IDeleteArguments commandArguments, IFileWrap fileWrap, IDirectoryWrap directoryWrap)
+        public DeleteCommand(IFileWrap fileWrap, IDirectoryWrap directoryWrap)
+            : base("Delete")
         {
-            _commandArguments = commandArguments;
             _fileWrap = fileWrap;
             _directoryWrap = directoryWrap;
         }
 
-        public async Task<ICommandResult> Run()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        protected override async Task<ICommandResult> DoRun(IDeleteArguments arguments)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            return await Task.Run(() =>
+            if (_fileWrap.IsDirectory(arguments.Path))
             {
-                if (_fileWrap.IsDirectory(_commandArguments.Path))
-                {
-                    _directoryWrap.Delete(_commandArguments.Path);
-                }
-                else
-                {
-                    _fileWrap.Delete(_commandArguments.Path);
-                }
+                _directoryWrap.Delete(arguments.Path);
+            }
+            else
+            {
+                _fileWrap.Delete(arguments.Path);
+            }
 
-                return new SuccessCommandResult(Name, _commandArguments.Path);
-            });
+            return new SuccessCommandResult(Name, arguments.Path);
         }
     }
 }

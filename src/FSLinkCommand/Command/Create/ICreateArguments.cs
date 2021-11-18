@@ -10,5 +10,4 @@ namespace FSLinkCommand.Command.Create
 
         string TargetPath { get; }
     }
-
 }

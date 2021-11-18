@@ -4,61 +4,57 @@ using System.Threading.Tasks;
 
 namespace FSLinkCommand.Command.Relink
 {
-    public class RelinkCommand : ICommandBase
+    public class RelinkCommand : CommandBase<IRelinkArguments>
     {
-        private readonly IRelinkArguments _commandArguments;
         private readonly IHardLink _hardLink;
         private readonly IJunction _junction;
         private readonly ISymbolicLink _symbolicLink;
         private readonly IFileSystemLink _fileSystemLink;
 
-        public string Name => "Relink";
-
-        public RelinkCommand(IRelinkArguments commandArguments, IHardLink hardLink, IJunction junction, ISymbolicLink symbolicLink, IFileSystemLink fileSystemLink)
+        public RelinkCommand(IHardLink hardLink, IJunction junction, ISymbolicLink symbolicLink, IFileSystemLink fileSystemLink)
+            : base("Relink")
         {
-            _commandArguments = commandArguments;
             _hardLink = hardLink;
             _junction = junction;
             _symbolicLink = symbolicLink;
             _fileSystemLink = fileSystemLink;
         }
 
-        public async Task<ICommandResult> Run()
+        protected override async Task<ICommandResult> DoRun(IRelinkArguments arguments)
         {
             return await Task.Run(() =>
             {
-                var linkType = _fileSystemLink.GetLinkType(_commandArguments.LinkPath);
+                var linkType = _fileSystemLink.GetLinkType(arguments.LinkPath);
 
                 return linkType switch
                 {
-                    FileSystemLinkType.HardLink => DoHardLink(),
-                    FileSystemLinkType.Junction => DoJunction(),
-                    FileSystemLinkType.SymbolicLink => DoSymbolicLink(),
-                    FileSystemLinkType.None => new ErrorCommandResult(Name, $"The path '{_commandArguments.LinkPath}' does not point to a file system link entity (symbolic link, hard link, or junction)."),
-                    _ => new ErrorCommandResult(Name, $"The path '{_commandArguments.LinkPath}' is an unknown link type '{linkType}'.")
+                    FileSystemLinkType.HardLink => DoHardLink(arguments),
+                    FileSystemLinkType.Junction => DoJunction(arguments),
+                    FileSystemLinkType.SymbolicLink => DoSymbolicLink(arguments),
+                    _ => new ErrorCommandResult(Name, $"The path '{arguments.LinkPath}' does not point to a file system link entity (symbolic link, hard link, or junction).")
                 };
             });
         }
 
-        private ICommandResult DoHardLink()
+        private ICommandResult DoHardLink(IRelinkArguments arguments)
         {
-            _hardLink.Delete(_commandArguments.LinkPath);
-            _hardLink.Create(_commandArguments.LinkPath, _commandArguments.NewTargetPath);
-            return new SuccessCommandResult(Name, new[] { _commandArguments.LinkPath, _commandArguments.NewTargetPath });
+            _hardLink.Delete(arguments.LinkPath);
+            _hardLink.Create(arguments.LinkPath, arguments.NewTargetPath);
+            return new SuccessCommandResult(Name, new[] { arguments.LinkPath, arguments.NewTargetPath });
         }
 
-        private ICommandResult DoJunction()
+        private ICommandResult DoJunction(IRelinkArguments arguments)
         {
-            _junction.Unlink(_commandArguments.LinkPath);
-            _junction.Create(_commandArguments.LinkPath, _commandArguments.NewTargetPath);
-            return new SuccessCommandResult(Name, new[] { _commandArguments.LinkPath, _commandArguments.NewTargetPath });
+            _junction.Unlink(arguments.LinkPath);
+            _junction.Create(arguments.LinkPath, arguments.NewTargetPath);
+            return new SuccessCommandResult(Name, new[] { arguments.LinkPath, arguments.NewTargetPath });
         }
 
-        private ICommandResult DoSymbolicLink()
+        private ICommandResult DoSymbolicLink(IRelinkArguments arguments)
         {
-            _symbolicLink.Unlink(_commandArguments.LinkPath);
-            _symbolicLink.Create(_commandArguments.LinkPath, _commandArguments.NewTargetPath);
-            return new SuccessCommandResult(Name, new[] { _commandArguments.LinkPath, _commandArguments.NewTargetPath });
+            _symbolicLink.Unlink(arguments.LinkPath);
+            _symbolicLink.Create(arguments.LinkPath, arguments.NewTargetPath);
+            return new SuccessCommandResult(Name, new[] { arguments.LinkPath, arguments.NewTargetPath });
         }
     }
 }

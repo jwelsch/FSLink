@@ -4,7 +4,7 @@ namespace FSLinkCommand.FileSystem
 {
     public interface IReparsePointLink
     {
-        void Unlink(string symbolicLinkPath);
+        void Unlink(string linkPath);
     }
 
     public abstract class ReparsePointLink : IReparsePointLink
@@ -16,9 +16,9 @@ namespace FSLinkCommand.FileSystem
             _fileSystemLink = fileSystemLink;
         }
 
-        public void Unlink(string symbolicLinkPath)
+        public void Unlink(string linkPath)
         {
-            _fileSystemLink.DeleteReparsePoint(symbolicLinkPath);
+            _fileSystemLink.DeleteReparsePoint(linkPath);
         }
     }
 }

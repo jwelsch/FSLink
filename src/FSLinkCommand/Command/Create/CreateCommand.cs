@@ -4,57 +4,35 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace FSLinkCommand.Command.Create
 {
-    public class CreateArguments : ICreateArguments
+    public class CreateCommand : CommandBase<ICreateArguments>
     {
-        public FileSystemLinkType LinkType { get; }
-
-        public string LinkPath { get; }
-
-        public string TargetPath { get; }
-
-        public CreateArguments(FileSystemLinkType linkType, string linkPath, string targetPath)
-        {
-            LinkType = linkType;
-            LinkPath = linkPath;
-            TargetPath = targetPath;
-        }
-    }
-
-    public class CreateCommand : ICommandBase
-    {
-        private readonly ICreateArguments _commandArguments;
         private readonly IFileSystemLink _fileSystemLink;
         private readonly IFileWrap _fileWrap;
         private readonly IDirectoryWrap _directoryWrap;
 
-        public string Name => "Create";
-
-        public CreateCommand(ICreateArguments commandArguments, IFileSystemLink fileSystemLink, IFileWrap fileWrap, IDirectoryWrap directoryWrap)
+        public CreateCommand(IFileSystemLink fileSystemLink, IFileWrap fileWrap, IDirectoryWrap directoryWrap)
+            : base("Create")
         {
-            _commandArguments = commandArguments;
             _fileSystemLink = fileSystemLink;
             _fileWrap = fileWrap;
             _directoryWrap = directoryWrap;
         }
 
-        public async Task<ICommandResult> Run()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        protected override async Task<ICommandResult> DoRun(ICreateArguments arguments)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            //try
-            //{
-                return await Task.Run(() => _commandArguments.LinkType switch
-                {
-                    FileSystemLinkType.HardLink => CreateHardLink(_commandArguments.LinkPath, _commandArguments.TargetPath),
-                    FileSystemLinkType.Junction => CreateJunction(_commandArguments.LinkPath, _commandArguments.TargetPath),
-                    FileSystemLinkType.SymbolicLink => CreateSymbolicLink(_commandArguments.LinkPath, _commandArguments.TargetPath),
-                    _ => new ErrorCommandResult(Name, new ArgumentException($"Unknown file system link type: '{_commandArguments.LinkType}'"))
-                });
-            //}
-            //catch (Exception ex)
-            //{
-            //    return new ErrorCommandResult(Name, new IOException($"Failed to create {_commandArguments.LinkType} at path '{_commandArguments.LinkPath}' with target '{_commandArguments.TargetPath}'", ex));
-            //}
+            return arguments.LinkType switch
+            {
+                FileSystemLinkType.HardLink => CreateHardLink(arguments.LinkPath, arguments.TargetPath),
+                FileSystemLinkType.Junction => CreateJunction(arguments.LinkPath, arguments.TargetPath),
+                FileSystemLinkType.SymbolicLink => CreateSymbolicLink(arguments.LinkPath, arguments.TargetPath),
+                _ => new ErrorCommandResult(Name, new ArgumentException($"Unknown file system link type: '{arguments.LinkType}'"))
+            };
         }
 
         private ICommandResult CreateHardLink(string hardLinkPath, string targetPath)

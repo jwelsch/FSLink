@@ -43,5 +43,21 @@ namespace FSLinkCommand.Tests.FileSystem
 
             fileSystemLink.Received(1).DeleteJunction(linkPath);
         }
+
+        [Fact]
+        public void When_unlink_is_called_then_correct_method_is_called()
+        {
+            using var autoSub = new AutoSubstitute();
+
+            var linkPath = AutoFixture.Create<string>();
+
+            var fileSystemLink = autoSub.Resolve<IFileSystemLink>();
+
+            var sut = autoSub.Resolve<SymbolicLink>();
+
+            sut.Unlink(linkPath);
+
+            fileSystemLink.Received(1).DeleteReparsePoint(linkPath);
+        }
     }
 }

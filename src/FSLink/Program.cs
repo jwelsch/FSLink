@@ -19,10 +19,13 @@ namespace FSLink
                 using var serviceProvider = RegisterServices();
 
                 var commandLineProcessor = serviceProvider.GetRequiredService<ICommandLineProcessor>();
-                var command = commandLineProcessor.Process(args);
+                var commandArguments = commandLineProcessor.Process(args);
+
+                var commandFactory = serviceProvider.GetRequiredService<ICommandFactory>();
+                var command = commandFactory.Create(commandArguments);
 
                 var application = serviceProvider.GetRequiredService<IApplicationHost>();
-                var result = application.Run(command);
+                var result = application.Run(command, commandArguments);
 
                 return result;
             }

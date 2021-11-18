@@ -1,4 +1,6 @@
-﻿namespace FSLinkCommand.Command.Scan
+﻿#nullable enable
+
+namespace FSLinkCommand.Command.Scan
 {
     public interface IScanArguments : ICommandArguments
     {

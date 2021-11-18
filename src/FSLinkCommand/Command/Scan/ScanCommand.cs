@@ -6,45 +6,41 @@ using System.Threading.Tasks;
 
 namespace FSLinkCommand.Command.Scan
 {
-    public class ScanCommand : ICommandBase
+    public class ScanCommand : CommandBase<IScanArguments>
     {
-        private readonly IScanArguments _commandArguments;
         private readonly IFileSystemLink _fileSystemLink;
         private readonly IFileSystemScanner _fileSystemScanner;
         private readonly IScanOutput _scanOutput;
 
-        public string Name => "Scan";
-
-        public ScanCommand(IScanArguments commandArguments, IFileSystemLink fileSystemLink, IFileSystemScanner fileSystemScanner, IScanOutput scanOutput)
+        public ScanCommand(IFileSystemLink fileSystemLink, IFileSystemScanner fileSystemScanner, IScanOutput scanOutput)
+            : base("Scan")
         {
-            _commandArguments = commandArguments;
             _fileSystemLink = fileSystemLink;
             _fileSystemScanner = fileSystemScanner;
             _scanOutput = scanOutput;
         }
 
-        public async Task<ICommandResult> Run()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        protected override async Task<ICommandResult> DoRun(IScanArguments arguments)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            return await Task.Run<ICommandResult>(() =>
+            var errors = new List<Exception>();
+
+            _fileSystemScanner.ScanPath(arguments.Path, "*", arguments.Recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, path =>
             {
-                var errors = new List<Exception>();
-
-                _fileSystemScanner.ScanPath(_commandArguments.Path, "*", _commandArguments.Recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, path =>
+                try
                 {
-                    try
-                    {
-                        var linkType = _fileSystemLink.GetLinkType(path);
-                        _scanOutput.OnFileSystemEntry(path, linkType);
-                    }
-                    catch (Exception ex)
-                    {
-                        _scanOutput.OnFileSystemError(path, ex);
-                    }
-                    return true;
-                });
-
-                return new SuccessCommandResult(Name, errors.ToArray());
+                    var linkType = _fileSystemLink.GetLinkType(path);
+                    return _scanOutput.OnFileSystemEntry(path, linkType);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add(ex);
+                    return _scanOutput.OnFileSystemError(path, ex);
+                }
             });
+
+            return new SuccessCommandResult(Name, errors.ToArray());
         }
     }
 }

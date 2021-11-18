@@ -7,8 +7,8 @@ namespace FSLinkCommand.Command.Scan
 {
     public interface IScanOutput
     {
-        void OnFileSystemEntry(string path, FileSystemLinkType linkType);
+        bool OnFileSystemEntry(string path, FileSystemLinkType linkType);
 
-        void OnFileSystemError(string path, Exception? error);
+        bool OnFileSystemError(string path, Exception? error);
     }
 }

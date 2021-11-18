@@ -15,42 +15,6 @@ namespace FSLinkCommand.Command
         object? Data { get; }
     }
 
-    public class CommandError
-    {
-        public string? Message { get; }
-
-        public int? Code { get; }
-
-        public Exception? Exception { get; }
-
-        public CommandError(string? message, int? code, Exception? exception)
-        {
-            Message = message;
-            Code = code;
-            Exception = exception;
-        }
-
-        public CommandError(string message)
-            : this(message, null, null)
-        {
-        }
-
-        public CommandError(string message, int code)
-            : this(message, code, null)
-        {
-        }
-
-        public CommandError(string message, Exception exception)
-            : this(message, null, exception)
-        {
-        }
-
-        public CommandError(Exception exception)
-            : this(null, null, exception)
-        {
-        }
-    }
-
     public abstract class CommandResult : ICommandResult
     {
         public string CommandName { get; }
@@ -106,12 +70,12 @@ namespace FSLinkCommand.Command
         }
 
         public ErrorCommandResult(string commandName, string message, Exception exception)
-            : base(false, commandName, new CommandError(message, null, exception))
+            : base(false, commandName, new CommandError(message, exception))
         {
         }
 
         public ErrorCommandResult(string commandName, Exception exception)
-            : base(false, commandName, new CommandError(null, null, exception))
+            : base(false, commandName, new CommandError(exception))
         {
         }
     }

@@ -14,14 +14,16 @@ namespace FSLink.Outputs
             _logger = loggerFactory.CreateLogger<ScanCommand>();
         }
 
-        public void OnFileSystemEntry(string path, FileSystemLinkType linkType)
+        public bool OnFileSystemEntry(string path, FileSystemLinkType linkType)
         {
             _logger.LogInformation($"'{path}' has link type '{linkType}'");
+            return true;
         }
 
-        public void OnFileSystemError(string path, Exception error)
+        public bool OnFileSystemError(string path, Exception error)
         {
             _logger.LogError($"Error while getting link type for path '{path}': {error.Message}");
+            return true;
         }
     }
 }

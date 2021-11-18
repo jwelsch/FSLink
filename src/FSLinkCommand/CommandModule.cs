@@ -8,6 +8,9 @@ namespace FSLinkCommand.Command
     {
         protected override void Load(ContainerBuilder builder)
         {
+            // Commands
+            builder.RegisterType<CommandRunner>().As<ICommandRunner>();
+
             // Scanning
             builder.RegisterType<FileSystemScanner>().As<IFileSystemScanner>();
 
