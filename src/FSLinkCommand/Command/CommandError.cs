@@ -4,7 +4,16 @@
 
 namespace FSLinkCommand.Command
 {
-    public class CommandError
+    public interface ICommandError
+    {
+        string? Message { get; }
+
+        int? Code { get; }
+
+        Exception? Exception { get; }
+    }
+
+    public class CommandError : ICommandError
     {
         private string? _asString;
 

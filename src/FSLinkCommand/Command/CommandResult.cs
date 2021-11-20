@@ -10,7 +10,7 @@ namespace FSLinkCommand.Command
 
         bool Success { get; }
 
-        CommandError? Error { get; }
+        ICommandError? Error { get; }
 
         object? Data { get; }
     }
@@ -21,7 +21,7 @@ namespace FSLinkCommand.Command
 
         public bool Success { get; }
 
-        public CommandError? Error { get; }
+        public ICommandError? Error { get; }
 
         public object? Data { get; }
 
@@ -30,12 +30,12 @@ namespace FSLinkCommand.Command
         {
         }
 
-        protected CommandResult(bool success, string commandName, CommandError? error)
+        protected CommandResult(bool success, string commandName, ICommandError? error)
             : this(success, commandName, null, error)
         {
         }
 
-        private CommandResult(bool success, string commandName, object? data, CommandError? error)
+        private CommandResult(bool success, string commandName, object? data, ICommandError? error)
         {
             Success = success;
             CommandName = commandName;
@@ -54,7 +54,7 @@ namespace FSLinkCommand.Command
 
     public class ErrorCommandResult : CommandResult
     {
-        public ErrorCommandResult(string commandName, CommandError error)
+        public ErrorCommandResult(string commandName, ICommandError error)
             : base(false, commandName, error)
         {
         }
