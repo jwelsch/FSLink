@@ -1,15 +1,15 @@
 ﻿using FSLinkCommand.Command.Scan;
+using FSLinkCommon.Wraps;
 using FSLinkLib;
-using Microsoft.Extensions.Logging;
 using System;
 
 namespace FSLink.Outputs
 {
     public class LogScanOutput : IScanOutput
     {
-        private readonly ILogger _logger;
+        private readonly ILoggerWrap _logger;
 
-        public LogScanOutput(ILoggerFactory loggerFactory)
+        public LogScanOutput(ILoggerFactoryWrap loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<ScanCommand>();
         }

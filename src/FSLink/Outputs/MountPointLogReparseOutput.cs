@@ -1,7 +1,7 @@
 ﻿using FSLinkCommand.Command.Reparse;
 using FSLinkCommon.Util;
+using FSLinkCommon.Wraps;
 using FSLinkLib.ReparsePoints;
-using Microsoft.Extensions.Logging;
 using System;
 
 #nullable enable
@@ -14,9 +14,9 @@ namespace FSLink.Outputs
 
     public class MountPointLogReparseOutput : IMountPointLogReparseOutput
     {
-        private readonly ILogger _logger;
+        private readonly ILoggerWrap _logger;
 
-        public MountPointLogReparseOutput(ILoggerFactory loggerFactory)
+        public MountPointLogReparseOutput(ILoggerFactoryWrap loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<ReparseCommand>();
         }

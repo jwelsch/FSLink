@@ -10,6 +10,8 @@ namespace FSLinkCommon
             // Wraps
             builder.RegisterType<DirectoryWrap>().As<IDirectoryWrap>();
             builder.RegisterType<FileWrap>().As<IFileWrap>();
+            builder.RegisterType<LoggerWrap>().As<ILoggerWrap>();
+            builder.RegisterType<LoggerFactoryWrap>().As<ILoggerFactoryWrap>();
         }
     }
 }

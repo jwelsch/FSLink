@@ -1,5 +1,6 @@
 ﻿using Autofac.Extras.NSubstitute;
 using AutoFixture;
+using AutoFixture.Kernel;
 using FluentAssertions;
 using FSLinkCommand.Command;
 using NSubstitute;
@@ -35,6 +36,11 @@ namespace FSLinkCommand.Tests.Command
         public void When_command_returns_error_then_error_result_is_returned()
         {
             using var autoSub = new AutoSubstitute();
+
+            AutoFixture.Customizations.Add(
+                new TypeRelay(
+                    typeof(ICommandError),
+                    typeof(CommandError)));
 
             var error = AutoFixture.Create<ErrorCommandResult>();
 

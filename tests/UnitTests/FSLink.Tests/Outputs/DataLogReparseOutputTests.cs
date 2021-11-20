@@ -4,8 +4,8 @@ using FluentAssertions;
 using FSLink.Outputs;
 using FSLink.Tests.Fakes;
 using FSLinkCommand.Command.Reparse;
+using FSLinkCommon.Wraps;
 using FSLinkLib.ReparsePoints;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
 using System.Linq;
@@ -24,9 +24,9 @@ namespace FSLink.Tests.Outputs
         {
             using var autoSub = new AutoSubstitute();
 
-            var logger = autoSub.Resolve<ILogger<ReparseCommand>>();
+            var logger = autoSub.Resolve<ILoggerWrap<ReparseCommand>>();
 
-            var factory = autoSub.Resolve<ILoggerFactory>();
+            var factory = autoSub.Resolve<ILoggerFactoryWrap>();
             factory.CreateLogger<ReparseCommand>().Returns(logger);
 
             var tag = autoSub.Resolve<IReparseTag>();
@@ -51,7 +51,7 @@ namespace FSLink.Tests.Outputs
 
             sut.OnReparsePointData(data);
 
-            //logger.Received(1).LogInformation(Arg.Any<string?>(), Arg.Any<object[]>());
+            logger.Received(1).LogInformation(Arg.Any<string?>(), Arg.Any<object?[]>());
         }
 
         [Fact]
@@ -59,9 +59,9 @@ namespace FSLink.Tests.Outputs
         {
             using var autoSub = new AutoSubstitute();
 
-            var logger = autoSub.Resolve<ILogger<ReparseCommand>>();
+            var logger = autoSub.Resolve<ILoggerWrap<ReparseCommand>>();
 
-            var factory = autoSub.Resolve<ILoggerFactory>();
+            var factory = autoSub.Resolve<ILoggerFactoryWrap>();
             factory.CreateLogger<ReparseCommand>().Returns(logger);
 
             var tag = autoSub.Resolve<IReparseTag>();

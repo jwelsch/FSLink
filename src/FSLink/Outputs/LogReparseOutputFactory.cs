@@ -1,6 +1,6 @@
 ﻿using FSLinkCommand.Command.Reparse;
+using FSLinkCommon.Wraps;
 using FSLinkLib.ReparsePoints;
-using Microsoft.Extensions.Logging;
 using System;
 
 #nullable enable
@@ -9,9 +9,9 @@ namespace FSLink.Outputs
 {
     public class LogReparseOutputFactory : ILogReparseOutputFactory
     {
-        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILoggerFactoryWrap _loggerFactory;
 
-        public LogReparseOutputFactory(ILoggerFactory loggerFactory)
+        public LogReparseOutputFactory(ILoggerFactoryWrap loggerFactory)
         {
             _loggerFactory = loggerFactory;
         }
