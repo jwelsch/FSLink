@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FSLinkCommand.Tests", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSLink.Tests", "tests\UnitTests\FSLink.Tests\FSLink.Tests.csproj", "{E2E6AF14-F004-4CDB-83F9-3C4CFF071E84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSLinkLib.Tests", "tests\UnitTests\FSLinkLib.Tests\FSLinkLib.Tests.csproj", "{4651205E-B4D9-4071-B532-D9B42544DEBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{E2E6AF14-F004-4CDB-83F9-3C4CFF071E84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2E6AF14-F004-4CDB-83F9-3C4CFF071E84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2E6AF14-F004-4CDB-83F9-3C4CFF071E84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4651205E-B4D9-4071-B532-D9B42544DEBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4651205E-B4D9-4071-B532-D9B42544DEBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4651205E-B4D9-4071-B532-D9B42544DEBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4651205E-B4D9-4071-B532-D9B42544DEBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{D516D010-3211-4484-8F5D-0FB7E6C7321D} = {01FC4946-150F-466E-95F8-2A66BD3AC53B}
 		{DE13ED10-0678-4E9F-B807-4006BA05AEAD} = {06B62AC5-336D-43F5-8026-2B05E8A18C56}
 		{E2E6AF14-F004-4CDB-83F9-3C4CFF071E84} = {06B62AC5-336D-43F5-8026-2B05E8A18C56}
+		{4651205E-B4D9-4071-B532-D9B42544DEBD} = {06B62AC5-336D-43F5-8026-2B05E8A18C56}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FCE32C39-0FAF-4CE1-B297-49A90298EA7E}

@@ -28,9 +28,9 @@ namespace FSLinkLib.ReparsePoints
 
         bool IsMicrosoft { get; }
 
-        bool IsNameSurrogate { get; }
-
         bool ReservedFlag0 { get; }
+
+        bool IsNameSurrogate { get; }
 
         bool ReservedFlag1 { get; }
 
@@ -39,7 +39,7 @@ namespace FSLinkLib.ReparsePoints
         ushort TagValue { get; }
     }
 
-    internal class ReparseTag : IReparseTag
+    public class ReparseTag : IReparseTag
     {
         public const uint MicrosoftMask = 0x80000000;     // 1000 0000 0000 0000 0000 0000 0000 0000
         public const uint ReservedFlag0Mask = 0x40000000; // 0100 0000 0000 0000 0000 0000 0000 0000
@@ -52,8 +52,8 @@ namespace FSLinkLib.ReparsePoints
 
         public uint RawData => _data;
         public bool IsMicrosoft => (MicrosoftMask & _data) != 0;
-        public bool IsNameSurrogate => (NameSurrogateMask & _data) != 0;
         public bool ReservedFlag0 => (ReservedFlag0Mask & _data) != 0;
+        public bool IsNameSurrogate => (NameSurrogateMask & _data) != 0;
         public bool ReservedFlag1 => (ReservedFlag1Mask & _data) != 0;
         public ushort ReservedBits => (ushort)((ReservedBitsMask & _data) >> 16);
         public ushort TagValue => (ushort)(TagValueMask & _data);
