@@ -1,5 +1,5 @@
 ﻿using FSLinkCommand.Command;
-using Microsoft.Extensions.Logging;
+using FSLinkCommon.Wraps;
 
 namespace FSLink
 {
@@ -10,12 +10,12 @@ namespace FSLink
 
     public class ApplicationHost : IApplicationHost
     {
-        private readonly ILogger _logger;
+        private readonly ILoggerWrap _logger;
         private readonly ICommandRunner _commandRunner;
 
-        public ApplicationHost(ILogger<ApplicationHost> logger, ICommandRunner commandRunner)
+        public ApplicationHost(ILoggerFactoryWrap loggerFactory, ICommandRunner commandRunner)
         {
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<ApplicationHost>();
             _commandRunner = commandRunner;
         }
 

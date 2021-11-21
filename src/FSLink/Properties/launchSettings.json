@@ -2,7 +2,7 @@
   "profiles": {
     "FSLink": {
       "commandName": "Project",
-      "commandLineArgs": "reparse --path \"C:\\Temp\\Link\\Junction\""
+      "commandLineArgs": "reparse --path \"C:\\Temp\\Link\\Target\\target.txt\""
     }
   }
 }

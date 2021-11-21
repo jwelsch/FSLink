@@ -2,7 +2,7 @@ using Autofac.Extras.NSubstitute;
 using AutoFixture;
 using FluentAssertions;
 using FSLinkCommand.Command;
-using Microsoft.Extensions.Logging;
+using FSLinkCommon.Wraps;
 using NSubstitute;
 using Xunit;
 
@@ -21,12 +21,17 @@ namespace FSLink.Tests
 
             using var autoSub = new AutoSubstitute();
 
-            var logger = autoSub.Resolve<ILogger<ApplicationHost>>();
+            var logger = autoSub.Resolve<ILoggerWrap<ApplicationHost>>();
+            var loggerFactory = autoSub.Resolve<ILoggerFactoryWrap>();
+            loggerFactory.CreateLogger<ApplicationHost>().Returns(logger);
+
             var command = autoSub.Resolve<ICommandBase>();
             var arguments = autoSub.Resolve<ICommandArguments>();
+
             var commandResult = autoSub.Resolve<ICommandResult>();
             commandResult.Success.Returns(true);
             commandResult.CommandName.Returns(commandName);
+
             var runner = autoSub.Resolve<ICommandRunner>();
             runner.Execute(command, arguments).Returns(commandResult);
 
@@ -47,15 +52,21 @@ namespace FSLink.Tests
 
             using var autoSub = new AutoSubstitute();
 
-            var logger = autoSub.Resolve<ILogger<ApplicationHost>>();
+            var logger = autoSub.Resolve<ILoggerWrap<ApplicationHost>>();
+            var loggerFactory = autoSub.Resolve<ILoggerFactoryWrap>();
+            loggerFactory.CreateLogger<ApplicationHost>().Returns(logger);
+
             var command = autoSub.Resolve<ICommandBase>();
             var arguments = autoSub.Resolve<ICommandArguments>();
+
             var commandError = autoSub.Resolve<ICommandError>();
             commandError.Code.Returns(commandErrorCode);
+
             var commandResult = autoSub.Resolve<ICommandResult>();
             commandResult.Success.Returns(false);
             commandResult.Error.Returns(commandError);
             commandResult.CommandName.Returns(commandName);
+
             var runner = autoSub.Resolve<ICommandRunner>();
             runner.Execute(command, arguments).Returns(commandResult);
 
@@ -65,7 +76,7 @@ namespace FSLink.Tests
 
             result.Should().Be(commandErrorCode);
             runner.Received(1).Execute(command, arguments);
-            //logger.Received(1).LogError(Arg.Any<string>(), Arg.Any<object[]>());
+            logger.Received(1).LogError(Arg.Any<string>(), Arg.Any<object[]>());
         }
 
         [Fact]
@@ -75,15 +86,21 @@ namespace FSLink.Tests
 
             using var autoSub = new AutoSubstitute();
 
-            var logger = autoSub.Resolve<ILogger<ApplicationHost>>();
+            var logger = autoSub.Resolve<ILoggerWrap<ApplicationHost>>();
+            var loggerFactory = autoSub.Resolve<ILoggerFactoryWrap>();
+            loggerFactory.CreateLogger<ApplicationHost>().Returns(logger);
+
             var command = autoSub.Resolve<ICommandBase>();
             var arguments = autoSub.Resolve<ICommandArguments>();
+
             var commandError = autoSub.Resolve<ICommandError>();
             commandError.Code.Returns((int?)null);
+
             var commandResult = autoSub.Resolve<ICommandResult>();
             commandResult.Success.Returns(false);
             commandResult.Error.Returns(commandError);
             commandResult.CommandName.Returns(commandName);
+
             var runner = autoSub.Resolve<ICommandRunner>();
             runner.Execute(command, arguments).Returns(commandResult);
 
@@ -102,13 +119,18 @@ namespace FSLink.Tests
 
             using var autoSub = new AutoSubstitute();
 
-            var logger = autoSub.Resolve<ILogger<ApplicationHost>>();
+            var logger = autoSub.Resolve<ILoggerWrap<ApplicationHost>>();
+            var loggerFactory = autoSub.Resolve<ILoggerFactoryWrap>();
+            loggerFactory.CreateLogger<ApplicationHost>().Returns(logger);
+
             var command = autoSub.Resolve<ICommandBase>();
             var arguments = autoSub.Resolve<ICommandArguments>();
+
             var commandResult = autoSub.Resolve<ICommandResult>();
             commandResult.Success.Returns(false);
             commandResult.Error.Returns((ICommandError?)null);
             commandResult.CommandName.Returns(commandName);
+
             var runner = autoSub.Resolve<ICommandRunner>();
             runner.Execute(command, arguments).Returns(commandResult);
 

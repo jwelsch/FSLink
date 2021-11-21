@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 
 #nullable enable
@@ -24,7 +23,7 @@ namespace FSLinkCommand.Command
             }
             catch (Exception ex)
             {
-                return new ErrorCommandResult(command.Name, new IOException($"Command '{command.Name}' threw an exception.", ex));
+                return new ErrorCommandResult(command.Name, ex);
             }
         }
     }
