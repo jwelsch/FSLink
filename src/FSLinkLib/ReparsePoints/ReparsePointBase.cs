@@ -39,6 +39,7 @@ namespace FSLinkLib.ReparsePoints
 
         /// <summary>
         /// Calculated length of data buffer for this reparse point.
+        /// DataBufferLength = DataLength - (ReparsePointMaxLength - MaxDataBufferLength)
         /// </summary>
         uint DataBufferLength { get; }
     }

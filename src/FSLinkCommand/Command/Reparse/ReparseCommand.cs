@@ -1,5 +1,4 @@
 ﻿using FSLinkLib;
-using System.IO;
 using System.Threading.Tasks;
 
 #nullable enable
@@ -26,7 +25,7 @@ namespace FSLinkCommand.Command.Reparse
 
             if (reparsePoint == null)
             {
-                return new ErrorCommandResult(Name, new IOException($"Failed to get reparse point data for path '{arguments.Path}'"));
+                return new ErrorCommandResult(Name, $"No reparse point found for path '{arguments.Path}'");
             }
 
             var output = _logReparseOutputFactory.Create(reparsePoint);

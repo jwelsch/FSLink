@@ -6,7 +6,6 @@ using FSLinkCommand.Command.Reparse;
 using FSLinkLib;
 using FSLinkLib.ReparsePoints;
 using NSubstitute;
-using System.IO;
 using Xunit;
 
 #nullable enable
@@ -63,7 +62,6 @@ namespace FSLinkCommand.Tests.Command.Relink
             reparseOutput.Received(1).OnReparsePointData(reparsePoint);
         }
 
-
         [Fact]
         public void When_reparse_point_not_given_then_return_error()
         {
@@ -94,8 +92,8 @@ namespace FSLinkCommand.Tests.Command.Relink
             task.Result.Data.Should().BeNull();
             task.Result.Error.Should().NotBeNull();
             task.Result.Error!.Code.Should().BeNull();
-            task.Result.Error!.Message.Should().BeNull();
-            task.Result.Error!.Exception.Should().BeOfType(typeof(IOException));
+            task.Result.Error!.Message.Should().Be($"No reparse point found for path '{path}'");
+            task.Result.Error!.Exception.Should().BeNull();
 
             fsLink.Received(1).GetReparsePoint(path);
             logReparseOutputFactory.DidNotReceive().Create(Arg.Any<IReparsePoint>());

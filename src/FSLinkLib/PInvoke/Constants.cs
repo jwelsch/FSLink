@@ -24,5 +24,8 @@
         public const string NonInterpretedPathPrefix = @"\??\";
 
         public const int MAX_PATH = 260;
+
+        public const int ERROR_SUCCESS = 0;
+        public const int ERROR_NOT_A_REPARSE_POINT = 0x1126; // 4390
     }
 }

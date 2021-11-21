@@ -316,7 +316,12 @@ namespace FSLinkLib
 
                 var lastError = Marshal.GetLastWin32Error();
 
-                if (lastError != 0)
+                if (lastError == Constants.ERROR_NOT_A_REPARSE_POINT)
+                {
+                    return null;
+                }
+
+                if (lastError != Constants.ERROR_SUCCESS)
                 {
                     throw new Win32Exception(lastError, $"Error getting reparse point data for path '{path}'");
                 }
