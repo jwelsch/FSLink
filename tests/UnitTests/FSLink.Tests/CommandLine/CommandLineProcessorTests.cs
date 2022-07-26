@@ -14,7 +14,7 @@ namespace FSLink.Tests.CommandLine
         private readonly static Fixture AutoFixture = new();
 
         [Fact]
-        public void When_empty_arguments_given_then_return_null()
+        public void When_empty_arguments_given_then_throw_argumentexception()
         {
             using var autoSub = new AutoSubstitute();
 
@@ -22,9 +22,36 @@ namespace FSLink.Tests.CommandLine
 
             var sut = autoSub.Resolve<CommandLineProcessor>();
 
-            var result = sut.Process(args);
+            Action act = () => sut.Process(args);
 
-            result.Should().BeNull();
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [Fact]
+        public void When_parse_error_then_throw_commandlineexception()
+        {
+            using var autoSub = new AutoSubstitute();
+
+            var verb = AutoFixture.Create<string>();
+            var linkPath = AutoFixture.Create<string>();
+            var targetPath = AutoFixture.Create<string>();
+
+            var args = new[]
+            {
+                verb,
+                "--link-type",
+                "HardLink",
+                "--link-path",
+                linkPath,
+                "--target-path",
+                targetPath
+            };
+
+            var sut = autoSub.Resolve<CommandLineProcessor>();
+
+            Action act = () => sut.Process(args);
+
+            act.Should().Throw<CommandLineException>();
         }
 
         [Fact]

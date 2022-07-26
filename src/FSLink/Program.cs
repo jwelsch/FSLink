@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using CommandLine;
 using FSLink.CommandLine;
 using FSLinkCommand.Command;
 using FSLinkCommon;
@@ -7,6 +8,7 @@ using FSLinkLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 
 namespace FSLink
 {
@@ -28,6 +30,14 @@ namespace FSLink
                 var result = application.Run(command, commandArguments);
 
                 return result;
+            }
+            catch (CommandLineException ex)
+            {
+                var joined = ex.Errors.Aggregate(string.Empty, (joined, next) => joined += $"{(joined.Length == 0 ? string.Empty : Environment.NewLine)}{ErrorToString(next)}");
+
+                var message = $"Command line error:{Environment.NewLine}{joined}";
+                System.Diagnostics.Trace.WriteLine(message);
+                Console.WriteLine(message);
             }
             catch (Exception ex)
             {
@@ -67,6 +77,16 @@ namespace FSLink
             builder.RegisterModule<FSLinkModule>();
             builder.RegisterModule<CommandModule>();
             builder.RegisterModule<ApplicationModule>();
+        }
+
+        private static string ErrorToString(Error error)
+        {
+            if (error is NamedError namedError)
+            {
+                return $"{error.Tag}: \"{namedError.NameInfo.NameText}\"";
+            }
+
+            return error.Tag.ToString();
         }
     }
 }
