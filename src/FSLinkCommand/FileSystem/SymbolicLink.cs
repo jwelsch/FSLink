@@ -19,12 +19,14 @@ namespace FSLinkCommand.FileSystem
     public class SymbolicLink : ReparsePointLink, ISymbolicLink
     {
         private readonly IFileSystemLink _fileSystemLink;
+        private readonly IFileSystemPrivilege _fileSystemPrivilege;
         private readonly IFileWrap _fileWrap;
 
-        public SymbolicLink(IFileSystemLink fileSystemLink, IFileWrap fileWrap)
-            : base(fileSystemLink)
+        public SymbolicLink(IFileSystemLink fileSystemLink, IFileSystemPrivilege fileSystemPrivilege, IFileWrap fileWrap)
+            : base(fileSystemLink, fileSystemPrivilege)
         {
             _fileSystemLink = fileSystemLink;
+            _fileSystemPrivilege = fileSystemPrivilege;
             _fileWrap = fileWrap;
         }
 

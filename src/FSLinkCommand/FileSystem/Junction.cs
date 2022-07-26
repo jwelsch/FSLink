@@ -18,11 +18,13 @@ namespace FSLinkCommand.FileSystem
     public class Junction : ReparsePointLink, IJunction
     {
         private readonly IFileSystemLink _fileSystemLink;
+        private readonly IFileSystemPrivilege _fileSystemPrivilege;
 
-        public Junction(IFileSystemLink fileSystemLink)
-            : base(fileSystemLink)
+        public Junction(IFileSystemLink fileSystemLink, IFileSystemPrivilege fileSystemPrivilege)
+            : base(fileSystemLink, fileSystemPrivilege)
         {
             _fileSystemLink = fileSystemLink;
+            _fileSystemPrivilege = fileSystemPrivilege;
         }
 
         public void Create(string junctionPath, string targetDirectoryPath)

@@ -9,6 +9,7 @@ namespace FSLinkLib
         {
             builder.RegisterType<NativeMethodCaller>().As<INativeMethodCaller>();
             builder.RegisterType<FileSystemLink>().As<IFileSystemLink>();
+            builder.RegisterType<FileSystemPrivilege>().As<IFileSystemPrivilege>();
         }
     }
 }
