@@ -3,37 +3,6 @@
 namespace FSLinkLib.PInvoke
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct REPARSE_DATA_BUFFER_SYMBOLICLINK
-    {
-        public uint ReparseTag;
-        public ushort ReparseDataLength;
-        public ushort Reserved;
-        public ushort SubstituteNameOffset;
-        public ushort SubstituteNameLength;
-        public ushort PrintNameOffset;
-        public ushort PrintNameLength;
-        public uint Flags;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF4)] // 16 KB - 12 bytes
-        public byte[] PathBuffer;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct REPARSE_DATA_BUFFER_MOUNTPOINT
-    {
-        public uint ReparseTag;
-        public ushort ReparseDataLength;
-        public ushort Reserved;
-        public ushort SubstituteNameOffset;
-        public ushort SubstituteNameLength;
-        public ushort PrintNameOffset;
-        public ushort PrintNameLength;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF8)] // 16 KB - 8 bytes
-        public byte[] PathBuffer;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
     public struct BY_HANDLE_FILE_INFORMATION
     {
         public uint FileAttributes;
@@ -48,6 +17,9 @@ namespace FSLinkLib.PInvoke
         public uint FileIndexLow;
     }
 
+    /// <summary>
+    /// Total size - 16 bytes.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct GUID
     {
@@ -77,7 +49,58 @@ namespace FSLinkLib.PInvoke
     }
 
     /// <summary>
-    /// Maximum size is 16 Kb.
+    /// Maximum size is 16 Kb, including the header.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct REPARSE_DATA_BUFFER_SYMBOLICLINK
+    {
+        // Header - 20 bytes
+        public uint ReparseTag;
+        public ushort ReparseDataLength;
+        public ushort Reserved;
+        public ushort SubstituteNameOffset;
+        public ushort SubstituteNameLength;
+        public ushort PrintNameOffset;
+        public ushort PrintNameLength;
+        public uint Flags;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FEC)] // 16 KB - 20 bytes
+        public byte[] PathBuffer;
+    }
+
+    /// <summary>
+    /// Maximum size is 16 Kb, including the header.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct REPARSE_DATA_BUFFER_MOUNTPOINT
+    {
+        // Header - 16 bytes
+        public uint ReparseTag;
+        public ushort ReparseDataLength;
+        public ushort Reserved;
+        public ushort SubstituteNameOffset;
+        public ushort SubstituteNameLength;
+        public ushort PrintNameOffset;
+        public ushort PrintNameLength;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF0)] // 16 KB - 16 bytes
+        public byte[] PathBuffer;
+    }
+
+    public struct REPARSE_GUID_DATA_BUFFER
+    {
+        // Header - 24 bytes
+        public uint ReparseTag;
+        public ushort ReparseDataLength;
+        public ushort Reserved;
+        GUID ReparseGuid;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FE8)] // 16 KB - 24 bytes
+        public byte[] DataBuffer;
+    }
+
+    /// <summary>
+    /// Maximum size is 16 Kb, including the header.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct REPARSE_DATA_BUFFER
@@ -88,7 +111,7 @@ namespace FSLinkLib.PInvoke
         public ushort Reserved;
 
         // Reparse point data
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x4000)] // 16 KB
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF8)] // 16 KB - 8 bytes
         public byte[] DataBuffer;
 
         //
@@ -133,5 +156,27 @@ namespace FSLinkLib.PInvoke
         //[FieldOffset(18)]
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 0x3FF4)] // 16 Kb - 12 bytes
         //public byte[] MntPtPathBuffer;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LUID
+    {
+        public uint LowPart;
+        public uint HighPart;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct LUID_AND_ATTRIBUTES
+    {
+        public LUID Luid;
+        public uint Attributes;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TOKEN_PRIVILEGES
+    {
+        public int PrivilegeCount;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.ANYSIZE_ARRAY)]
+        public LUID_AND_ATTRIBUTES[] Privileges;
     }
 }

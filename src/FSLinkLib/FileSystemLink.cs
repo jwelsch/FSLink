@@ -364,15 +364,28 @@ namespace FSLinkLib
 
         public void DeleteReparsePoint(string path)
         {
-            var fileHandle = OpenReparsePoint(path, FileDesiredAccess.GenericAll);
+            var reparseBuffer = new REPARSE_DATA_BUFFER
+            {
+                ReparseTag = Constants.IO_REPARSE_TAG_SYMLINK,
+                ReparseDataLength = 0
+            };
+            var reparseBufferHeaderSize = 8;
+
+            var inBufferSize = Marshal.SizeOf<REPARSE_DATA_BUFFER>();
+
+            var fileHandle = OpenReparsePoint(path, FileDesiredAccess.GenericZero);
 
             var success = false;
+            var inBuffer = IntPtr.Zero;
 
             try
             {
+                inBuffer = Marshal.AllocHGlobal(inBufferSize);
+                Marshal.StructureToPtr(reparseBuffer, inBuffer, false);
+
                 fileHandle.DangerousAddRef(ref success);
 
-                var result = _nativeMethodCaller.DeviceIoControl(fileHandle.DangerousGetHandle(), Constants.FSCTL_DELETE_REPARSE_POINT, IntPtr.Zero, 0, IntPtr.Zero, 0, out int bytesReturned, IntPtr.Zero);
+                var result = _nativeMethodCaller.DeviceIoControl(fileHandle.DangerousGetHandle(), Constants.FSCTL_DELETE_REPARSE_POINT, inBuffer, reparseBufferHeaderSize);//, IntPtr.Zero, 0, out int bytesReturned, IntPtr.Zero);
 
                 if (!result)
                 {
@@ -382,6 +395,8 @@ namespace FSLinkLib
             }
             finally
             {
+                Marshal.FreeHGlobal(inBuffer);
+
                 if (success)
                 {
                     fileHandle.DangerousRelease();
