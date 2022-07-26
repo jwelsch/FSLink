@@ -1,0 +1,17 @@
+create --link-type symboliclink --link-path "C:\Temp\Link\sym-link.txt" --target-path "C:\Temp\Link\Normal.txt"
+
+relink --link-path "C:\Temp\Link\sym-link.txt" --new-target-path "C:\Temp\Link\Target2\target2.txt"
+
+relink --link-path "C:\Temp\Link\SymbolicLink.txt" --new-target-path "C:\Temp\Link\Target2\target2.txt"
+
+// Give process SE_RESTORE_NAME privileges
+HANDLE hToken;
+TOKEN_PRIVILEGES tp;
+OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken);
+LookupPrivilegeValue(NULL,  SE_RESTORE_NAME ,  &tp.Privileges[0].Luid);
+
+tp.PrivilegeCount = 1;
+tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+CloseHandle(hToken);

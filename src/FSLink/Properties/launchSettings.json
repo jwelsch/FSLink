@@ -2,7 +2,7 @@
   "profiles": {
     "FSLink": {
       "commandName": "Project",
-      "commandLineArgs": "reparse --path \"C:\\Temp\\Link\\Target\\target.txt\""
+      "commandLineArgs": "relink --link-path \"C:\\Temp\\Link\\sym-link.txt\" --new-target-path \"C:\\Temp\\Link\\Target2\\target2.txt\""
     }
   }
 }
