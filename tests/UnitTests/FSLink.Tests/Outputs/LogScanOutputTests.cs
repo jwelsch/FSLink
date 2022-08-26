@@ -5,6 +5,7 @@ using FSLink.Outputs;
 using FSLinkCommand.Command.Scan;
 using FSLinkCommon.Wraps;
 using FSLinkLib;
+using FSLinkLib.ReparsePoints;
 using NSubstitute;
 using System;
 using Xunit;
@@ -30,12 +31,14 @@ namespace FSLink.Tests.Outputs
             var factory = autoSub.Resolve<ILoggerFactoryWrap>();
             factory.CreateLogger<ScanCommand>().Returns(logger);
 
+            var reparsePoint = autoSub.Resolve<IReparsePoint>();
+
             var sut = autoSub.Resolve<LogScanOutput>();
 
-            var result = sut.OnFileSystemEntry(path, linkType);
+            var result = sut.OnFileSystemEntry(path, linkType, reparsePoint);
 
             result.Should().BeTrue();
-            logger.Received(1).LogInformation($"'{path}' has link type '{linkType}'");
+            logger.Received(1).LogInformation(Arg.Any<string>());
         }
 
         [Fact]
@@ -56,7 +59,7 @@ namespace FSLink.Tests.Outputs
             var result = sut.OnFileSystemError(path, error);
 
             result.Should().BeTrue();
-            logger.Received(1).LogError($"Error while getting link type for path '{path}': {error.Message}");
+            logger.Received(1).LogError(Arg.Any<string>());
         }
     }
 }
