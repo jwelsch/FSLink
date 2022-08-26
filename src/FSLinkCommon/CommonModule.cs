@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using FSLinkCommon.Util;
 using FSLinkCommon.Wraps;
 
 namespace FSLinkCommon
@@ -12,6 +13,9 @@ namespace FSLinkCommon
             builder.RegisterType<FileWrap>().As<IFileWrap>();
             builder.RegisterType<LoggerWrap>().As<ILoggerWrap>();
             builder.RegisterType<LoggerFactoryWrap>().As<ILoggerFactoryWrap>();
+
+            builder.RegisterType<StringPaddingCalculator>().As<IStringPaddingCalculator>();
+            builder.RegisterType<EnumValueStringLengthCalculator>().As<IEnumValueStringLengthCalculator>();
         }
     }
 }

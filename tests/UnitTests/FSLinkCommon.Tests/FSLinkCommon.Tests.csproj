@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\FSLinkCommon\FSLinkCommon.csproj" />
+    <ProjectReference Include="..\..\FSLinkTesting\FSLinkTesting.csproj" />
   </ItemGroup>
 
 </Project>

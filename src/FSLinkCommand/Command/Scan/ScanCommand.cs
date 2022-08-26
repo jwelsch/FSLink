@@ -31,7 +31,8 @@ namespace FSLinkCommand.Command.Scan
                 try
                 {
                     var linkType = _fileSystemLink.GetLinkType(path);
-                    return _scanOutput.OnFileSystemEntry(path, linkType);
+                    var reparsePoint = _fileSystemLink.GetReparsePoint(path);
+                    return _scanOutput.OnFileSystemEntry(path, linkType, reparsePoint);
                 }
                 catch (Exception ex)
                 {
