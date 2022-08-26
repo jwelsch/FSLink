@@ -1,8 +1,16 @@
 {
   "profiles": {
-    "FSLink": {
+    "scan": {
+      "commandName": "Project",
+      "commandLineArgs": "scan --path \"C:\\Temp\\Link\" --recurse"
+    },
+    "relink": {
       "commandName": "Project",
       "commandLineArgs": "relink --link-path \"C:\\Temp\\Link\\sym-link.txt\" --new-target-path \"C:\\Temp\\Link\\Target2\\target2.txt\""
+    },
+    "reparse": {
+      "commandName": "Project",
+      "commandLineArgs": "reparse --path \"C:\\Temp\\Link\\sym-link.txt\""
     }
   }
 }

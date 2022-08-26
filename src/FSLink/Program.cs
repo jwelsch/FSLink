@@ -66,7 +66,8 @@ namespace FSLink
         {
             services.AddLogging(configure =>
             {
-                configure.AddConsole();
+                configure.AddConsole(o => o.FormatterName = "CustomConsoleFormatter")
+                         .AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleOptions>();
                 configure.AddDebug();
             });
         }
