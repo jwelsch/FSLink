@@ -3,13 +3,13 @@ using FSLinkCommand.Command.Scan;
 
 namespace FSLink.CommandLine
 {
-    [Verb("scan")]
+    [Verb("scan", HelpText = "Scans a directory for file system links and prints the results to the console.")]
     public class ScanArguments : IScanArguments
     {
-        [Option("path", Required = true)]
+        [Option("path", Required = true, HelpText = "Path of the directory to scan.")]
         public string Path { get; set; }
 
-        [Option("recurse", Required = false)]
+        [Option("recurse", Required = false, HelpText = "Include to recurse through child directories, exclude to only scan the top level directory.")]
         public bool Recurse { get; set; }
     }
 }
